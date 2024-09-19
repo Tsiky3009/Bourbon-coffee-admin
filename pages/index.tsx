@@ -92,7 +92,7 @@ export default function Home({
           This page uses the&nbsp;<strong>Pages Router</strong>. Check out the
           App Router version here:&nbsp;
           <Link
-            href="/app-demo"
+            href="/demo"
             className="underline transition-colors ease-in-out hover:text-green-500"
           >
             <code>app/app-demo/page.tsx</code>
