@@ -8,20 +8,21 @@ export default function Login() {
   const [error, setError] = useState("");
   const router = useRouter();
 
+
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-      event.preventDefault();
-      const formData = new FormData(event.currentTarget);
-      const res = await signIn("credentials", {
-        email: formData.get("email"),
-        password: formData.get("password"),
-        redirect: false,
-      });
-      if (res?.error) {
-        setError(res.error as string);
-      }
-      if (res?.ok) {
-        return router.push("/");
-      }
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    const res = await signIn("credentials", {
+      email: formData.get("email"),
+      password: formData.get("password"),
+      redirect: false,
+    });
+    if (res?.error) {
+      setError(res.error as string);
+    }
+    if (res?.ok) {
+      return router.push("/");
+    }
   };
   return (
     <section className="w-full h-screen flex items-center justify-center">
