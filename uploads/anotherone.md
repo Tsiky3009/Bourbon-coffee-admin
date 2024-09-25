@@ -12,6 +12,7 @@ export default async function handler(
       // const files = await cursor.toArray();
       // return res.json(files);
       const files = await readdir("./uploads");
+      // console.log(files);
       return res.json(files);
     }
 
