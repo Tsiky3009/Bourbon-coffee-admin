@@ -1,0 +1,11 @@
+.navbarBody{
+    width: 100%;
+    height: 40.26em;
+    background-color: black;
+}
+
+.navbarBody li a{
+    display: flex;
+    flex-direction: column;
+    color: white;
+}
