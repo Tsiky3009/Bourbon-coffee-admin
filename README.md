@@ -9,7 +9,8 @@
 - [] setup NextAuth (Tsiky)
 
 - [] create edito api (Mahefa)
-  - [] create collections (table)
+  - [x] create collections (table)
+    - using GridFS's default collection
   - [] write endpoints logic
   - [] test
 

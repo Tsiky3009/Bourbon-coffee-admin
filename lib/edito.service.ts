@@ -34,5 +34,5 @@ export async function uploadFile(filepath?: string) {
 export async function retrieveFiles() {
   const bucket = createGridFSBucket();
 
-  return bucket.find({}, { filename: 1 });
+  return bucket.find({});
 }
