@@ -6,7 +6,9 @@
     "start": "next start"
   },
   "dependencies": {
+    "@cyntler/react-doc-viewer": "^1.17.0",
     "formidable": "^3.5.1",
+    "fs": "^0.0.1-security",
     "mongodb": "^6.9.0",
     "next": "latest",
     "react": "^18",

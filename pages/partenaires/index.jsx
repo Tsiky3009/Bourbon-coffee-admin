@@ -18,7 +18,7 @@ export default function Partenaires(){
         { name: "Cirad"},
         { name: "Groupama"},
         { name: "Ambassade de france"},
-      ];
+    ];
 
 
     const handleFileChange = (e) =>{
