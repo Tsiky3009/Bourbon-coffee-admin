@@ -13,7 +13,7 @@
   - [] write endpoints logic
   - [] test
 
-- [x] create edito api (Tsiky)
+- [x] create partner api (Tsiky)
   - [x] create collections (table)
   - [x] write endpoints logic
   - [x] test
