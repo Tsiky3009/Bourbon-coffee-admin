@@ -1,71 +1,129 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Navbar from "../../components/navbar"
 import style from "./styles/partenaire.module.css" 
-import { redirect } from "next/dist/server/api-utils"
+import Image from "next/image"
 import Delete from "../../public/trash.png"
 import Edit from "../../public/pencil.png"
-import Image from "next/image"
 
 export default function Partenaires(){
+    const [nom, setNom] = useState('')
+    const [lien, setLien] = useState('')
+    const [desc, setDesc] = useState('')
+    const [file, setFile] = useState(null)
+    const [preview, setPreview] = useState(null)
+    const [partenaires, setPartenaires] = useState([])
+    const [isLoading, setIsLoading] = useState(false)
+    const [error, setError] = useState(null)
+    const [editingId, setEditingId] = useState(null)
 
-    const [nom,setNom] = useState('')
-    const [lien,setLien] = useState('')
-    const [desc,setDesc] =useState('')
-    const [file,setFile] = useState(null)
-    const [preview,setPreview] = useState(null)
+    useEffect(() => {
+        fetchPartenaires()
+    }, [])
 
-    const data = [
-        { name: "Cirad"},
-        { name: "Groupama"},
-        { name: "Ambassade de france"},
-    ];
+    const fetchPartenaires = async () => {
+        setIsLoading(true)
+        try {
+            const response = await fetch('/api/upload')
+            if (!response.ok) {
+                throw new Error('Failed to fetch partenaires')
+            }
+            const data = await response.json()
+            setPartenaires(data)
+        } catch (err) {
+            setError(err.message)
+        } finally {
+            setIsLoading(false)
+        }
+    }
 
-
-    const handleFileChange = (e) =>{
+    const handleFileChange = (e) => {
         const selectedfile = e.target.files[0];
         setFile(selectedfile)
 
-        // Create a preview URL
         if(selectedfile){
             const reader = new FileReader()
-
             reader.onloadend = () => {
                 setPreview(reader.result)
             }
             reader.readAsDataURL(selectedfile)
-        }else{
-            selectedfile(null)
+        } else {
+            setPreview(null)
         }
     }
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setIsLoading(true)
+        setError(null)
 
         const formData = new FormData();
-
-        formData.append('id_nom',nom);
-        formData.append('id_lien',lien);
-        formData.append('input_desc',desc);
-        formData.append('fileupload',file)
+        formData.append('id_nom', nom);
+        formData.append('id_lien', lien);
+        formData.append('input_desc', desc);
+        if (file) {
+            formData.append('fileupload', file)
+        }
 
         try {
-            const response = await fetch('api/upload', {
-                method:'POST',
-                body:formData,
+            const url = editingId ? `/api/upload?id=${editingId}` : '/api/upload';
+            const method = editingId ? 'PUT' : 'POST';
+
+            const response = await fetch(url, {
+                method: method,
+                body: formData,
             })
-            console.log(formData)
-            console.log(response)
-            if (response.ok) {
-                console.log('Form submitted successfully!');
-            }else{
-                console.error('Failed to submit the form.');
+            
+            if (!response.ok) {
+                throw new Error('Failed to submit the form')
             }
 
+            const result = await response.json()
+            console.log('Form submitted successfully:', result);
+            
+            // Clear form fields
+            setNom('')
+            setLien('')
+            setDesc('')
+            setFile(null)
+            setPreview(null)
+            setEditingId(null)
 
-        } catch (error) {
-            console.error('Error submitting the form:', error);
+            // Refresh the list of partenaires
+            await fetchPartenaires()
+        } catch (err) {
+            setError(err.message)
+        } finally {
+            setIsLoading(false)
         }
     }
+
+    const handleDelete = async (id) => {
+        if (window.confirm('Are you sure you want to delete this partenaire?')) {
+            setIsLoading(true)
+            try {
+                const response = await fetch(`/api/upload?id=${id}`, {
+                    method: 'DELETE'
+                })
+                if (!response.ok) {
+                    throw new Error('Failed to delete partenaire')
+                }
+                await fetchPartenaires()
+            } catch (err) {
+                setError(err.message)
+            } finally {
+                setIsLoading(false)
+            }
+        }
+    }
+
+    const handleEdit = (partenaire) => {
+        setEditingId(partenaire._id)
+        setNom(partenaire.nom)
+        setLien(partenaire.lien)
+        setDesc(partenaire.description)
+        setPreview(null) // Reset preview as we don't have the image URL
+    }
+
     return(
         <>
             <div className={style.body}>
@@ -82,7 +140,6 @@ export default function Partenaires(){
                             <input type="text" id="id_lien" value={lien} onChange={(e)=> setLien(e.target.value)}/>
 
                             <label htmlFor="id_desc">Descriptions</label>
-
                             <textarea name="input_desc" id="id_desc" value={desc} onChange={(e) => setDesc(e.target.value)}></textarea>
 
                             {preview && (
@@ -92,38 +149,46 @@ export default function Partenaires(){
                                 </div>
                             )}
                             
-                            <input type="file" name="fileupload" id="" onChange={handleFileChange}/>
+                            <input type="file" name="fileupload" id="fileupload" onChange={handleFileChange}/>
 
-                            <button type="submit">Enregister</button>
+                            <button type="submit" disabled={isLoading}>
+                                {isLoading ? 'Enregistrement...' : (editingId ? 'Mettre à jour' : 'Enregistrer')}
+                            </button>
                         </form>
+                        {error && <p className={style.error}>{error}</p>}
                     </div>
                     <div className={style.list}>
-                        <table className={style.list_partenaire}>
-                            <thead>
-                                <tr className={style.t_head}>
-                                    <td>Nom</td>
-                                    <td></td>
-                                    <td></td>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {data.map((row,index)=>
-                                    <tr key={index}>
-                                        <td>{row.name}</td>
-                                        <td>
-                                            <div className={style.delete}>
-                                                <Image src={Delete} width={20} height={20} alt="delete_icon"/>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div className={style.edit}>
-                                                <Image src={Edit} width={20} height={20} alt="edit_icon"/>
-                                            </div>
-                                        </td>
+                        {isLoading ? (
+                            <p>Chargement des partenaires...</p>
+                        ) : (
+                            <table className={style.list_partenaire}>
+                                <thead>
+                                    <tr className={style.t_head}>
+                                        <th>Nom</th>
+                                        <th>Lien</th>
+                                        <th>Description</th>
+                                        <th>Actions</th>
                                     </tr>
-                                )}
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    {partenaires.map((partenaire, index) => (
+                                        <tr className={style.items} key={partenaire._id || index}>
+                                            <td>{partenaire.nom}</td>
+                                            <td>{partenaire.lien}</td>
+                                            <td>{partenaire.description}</td>
+                                            <td className={style.action}>
+                                                <button onClick={() => handleDelete(partenaire._id)} className={style.delete}>
+                                                    <Image src={Delete} width={20} height={20} alt="delete_icon"/>
+                                                </button>
+                                                <button onClick={() => handleEdit(partenaire)} className={style.edit}>
+                                                    <Image src={Edit} width={20} height={20} alt="edit_icon"/>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        )}
                     </div>
                 </div>
             </div>

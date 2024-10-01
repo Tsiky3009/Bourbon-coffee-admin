@@ -4,13 +4,15 @@ import style from "./styles/edito.module.css"
 import Delete from "../../public/trash.png"
 import Edit from "../../public/pencil.png"
 import Image from "next/image"
-import DocViewer, { DocViewerRenderers } from "@cyntler/react-doc-viewer";
+//import DocViewer, { DocViewerRenderers } from "@cyntler/react-doc-viewer";
 //import { read } from "fs"
+import DocumentViewer from "@/components/DocumentViewer";
 
 export default function Edito() {
 
     const [filePreview, setFilePreview] = useState(null);
     const [selectedFile, setSelectedFile] = useState(null);
+    const [fileURL, setFileURL] = useState(null); // For storing file URL
 
     const data = [
         { name: "Cirad"},
@@ -25,15 +27,19 @@ export default function Edito() {
       
         if (file) {
             const fileURL = URL.createObjectURL(file);
-      
-            if (file.name.endsWith(".docx") || file.name.endsWith(".pdf")) {
-              setFilePreview([{ uri: fileURL }]);
+            setFileURL(fileURL);
+
+            // Handling PDFs and DOCX differently
+            if (file.name.endsWith(".pdf")) {
+                setFilePreview(<DocumentViewer fileUrl={fileURL} local={true} />); // Preview local PDF
+            } else if (file.name.endsWith(".docx")) {
+                setFilePreview(<DocumentViewer fileUrl={fileURL} local={true} />); // Docx still requires Google Docs Viewer, but we'll use the blob URL
             } else if (file.type.startsWith("image/")) {
-              setFilePreview(<img src={fileURL} alt="preview" width={200} />);
+                setFilePreview(<img src={fileURL} alt="preview" width={200} />);
             } else {
-              setFilePreview(<p>{file.name}</p>);
+                setFilePreview(<p>{file.name}</p>);
             }
-          } else {
+        } else {
             setFilePreview(null);
         }
     };
@@ -66,14 +72,7 @@ export default function Edito() {
                     <div className={style.form}>
                         <input type="file" name="fileupload" id="" onChange={handleFileChange}/>
                         <div className={style.file_preview}>
-                            {filePreview && typeof filePreview === "object" ? (
-                                <DocViewer
-                                documents={filePreview}
-                                pluginRenderers={DocViewerRenderers}
-                                />
-                            ) : (
-                                filePreview
-                            )}
+                            {filePreview}
                         </div>
                         <button onClick={handleUpload}>Upload file</button>
                     </div>

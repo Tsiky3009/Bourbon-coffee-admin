@@ -1,0 +1,7 @@
+.embed #outerContainer #mainContainer div.toolbar {
+    display: none !important; /* hide PDF viewer toolbar */
+}
+.embed #outerContainer #mainContainer #viewerContainer {
+    top: 0 !important; /* move doc up into empty bar space */
+}
+  

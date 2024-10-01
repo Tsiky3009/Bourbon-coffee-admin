@@ -13,9 +13,9 @@
   - [] write endpoints logic
   - [] test
 
-- [] create edito api (Tsiky)
-  - [] create collections (table)
-  - [] write endpoints logic
-  - [] test
+- [x] create edito api (Tsiky)
+  - [x] create collections (table)
+  - [x] write endpoints logic
+  - [x] test
 
 - [] Dynamic page generation page generation (Mahefa)

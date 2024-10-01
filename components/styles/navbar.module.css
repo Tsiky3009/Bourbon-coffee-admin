@@ -1,11 +1,30 @@
-.navbarBody{
-    width: 100%;
-    height: 40.26em;
+.navbarBody {
+    width: 20%;
+    height: 100vh;
     background-color: black;
-}
-
-.navbarBody li a{
+    position: fixed;
     display: flex;
     flex-direction: column;
+    justify-content: start;
+    padding-top: 2em;
+}
+
+.navbarBody li {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.navbarBody li a {
+    display: block;
+    padding: 1em;
     color: white;
+    text-decoration: none;
+    font-size: 1.2em;
+    transition: background-color 0.3s ease;
+}
+
+.navbarBody li a:hover {
+    background-color: #333;
+    cursor: pointer;
 }
