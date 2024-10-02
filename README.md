@@ -29,3 +29,10 @@ NEXTAUTH_URL=https://example.com
   - [] test
 
 - [] Dynamic page generation page generation (Mahefa)
+  - [] backend: 
+    - [] CRUD User Interface
+      - /[id] with Static Site Generation
+    - [] API
+  - [] frontend:
+    - dynamic update with Increment Static Rendering
+
