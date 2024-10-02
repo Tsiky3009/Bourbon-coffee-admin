@@ -1,50 +1,64 @@
+import React from 'react';
 import styles from "./styles/document-viewer.module.css";
 
 type Props = {
   fileUrl: string;
   local?: boolean;
+  fileType?: string;
 };
 
-/**
- * This component render document via Google Docs API
- *  if `local` is false
- * else it render the document using an embed
- *
- * Why?: When it is on dev server, the GDocs API can't access the local file.
- * - On prod, local params can be omitted
- */
-export default function DocumentViewer({ fileUrl, local = false }: Props) {
-  // TODO:
-  // Add an url checker
-  // Add an error handler
-  //  offline error
-  //  Google Docs  error
-
-  if (local) {
-    return (
-      <embed
-        // src={`/pdf/${fileUrl}#toolbar=0&navpanes=0&scrollbar=0`}
-        src={`/file_uploads/${fileUrl}#pagemode=none`}
-        type="application/pdf"
-        frameBorder="0"
-        scrolling="auto"
-        height="100%"
-        width="100%"
-        className={styles.embed}
-      ></embed>
-    );
-  }
+export default function DocumentViewer({ fileUrl, local = false, fileType }: Props) {
+  const renderContent = () => {
+    if (local) {
+      // Pour les fichiers locaux
+      if (fileType === 'application/pdf' || fileUrl.endsWith('.pdf')) {
+        return (
+          <embed
+            src={fileUrl}
+            type="application/pdf"
+            width="100%"
+            height="600px"
+            className={styles.embed}
+          />
+        );
+      } else if (
+        fileType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+        fileUrl.endsWith('.docx') ||
+        fileType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
+        fileUrl.endsWith('.xlsx')
+      ) {
+        // Utilisation de Google Docs Viewer pour DOCX et XLSX
+        return (
+          <iframe
+            src={`https://docs.google.com/gview?url=${encodeURIComponent(fileUrl)}&embedded=true`}
+            style={{ width: "100%", height: "600px" }}
+            frameBorder="0"
+          />
+        );
+      } else if (fileType?.startsWith('image/')) {
+        return <img src={fileUrl} alt="Preview" style={{ maxWidth: '100%', maxHeight: '600px' }} />;
+      } else {
+        return (
+          <div>
+            <p>Prévisualisation non disponible pour ce type de fichier. Veuillez <a href={fileUrl} download>Télécharger</a> le fichier pour le voir.</p>
+          </div>
+        );
+      }
+    } else {
+      // Pour les fichiers non locaux, utiliser Google Docs Viewer
+      return (
+        <iframe
+          src={`https://docs.google.com/gview?url=${encodeURIComponent(fileUrl)}&embedded=true`}
+          style={{ width: "100%", height: "600px" }}
+          frameBorder="0"
+        />
+      );
+    }
+  };
 
   return (
-    <iframe
-      src={`http://docs.google.com/gview?url=${fileUrl}&embedded=true`}
-      style={{ width: "100%", height: 500 }}
-      frameborder="0"
-    ></iframe>
+    <div className={styles.documentViewer}>
+      {renderContent()}
+    </div>
   );
 }
-
-// TODO: check which is best iframe vs embed
-
-/*
- */

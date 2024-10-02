@@ -9,6 +9,7 @@
     "@cyntler/react-doc-viewer": "^1.17.0",
     "formidable": "^3.5.1",
     "fs": "^0.0.1-security",
+    "libreoffice-convert": "^1.6.0",
     "mongodb": "^6.9.0",
     "next": "latest",
     "react": "^18",
