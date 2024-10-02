@@ -8,10 +8,10 @@
 
 - [] setup NextAuth (Tsiky)
 
-- [] create edito api (Mahefa)
-  - [] create collections (table)
-  - [] write endpoints logic
-  - [] test
+- [x] create edito api (Mahefa)
+  - [x] create collections (table)
+  - [x] write endpoints logic
+  - [x] test
 
 - [x] create partner api (Tsiky)
   - [x] create collections (table)

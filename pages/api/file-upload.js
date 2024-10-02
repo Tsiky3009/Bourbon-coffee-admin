@@ -1,10 +1,11 @@
 // pages/api/file-upload.js
+
 import formidable from "formidable";
 import { promises as fsPromises } from "fs";
 import path from "path";
-import { MongoClient } from 'mongodb';
-import libre from 'libreoffice-convert';
+import { MongoClient, ObjectId } from 'mongodb';
 
+// Désactive le bodyParser de Next.js pour gérer les fichiers
 export const config = {
     api: {
         bodyParser: false,
@@ -14,189 +15,185 @@ export const config = {
 const uri = process.env.MONGODB_URI;
 const client = new MongoClient(uri);
 
-// Répertoire d'upload
-const uploadDir = path.join(process.cwd(), 'public', 'uploads');
-
-// Assurez-vous que le répertoire existe
-fsPromises.mkdir(uploadDir, { recursive: true }).catch(console.error);
-
 export default async function handler(req, res) {
-    if (req.method === 'POST') {
-        const form = new formidable.IncomingForm({
+    let database, collection;
+
+    try {
+        await client.connect();
+        database = client.db("bourbon");
+        collection = database.collection("files");
+    } catch (error) {
+        console.error("Error connecting to database:", error);
+        return res.status(500).json({ error: "Failed to connect to database" });
+    }
+
+    if (req.method === "POST") {
+        const uploadDir = path.join(process.cwd(), "public", "file_uploads");
+        try {
+            await fsPromises.mkdir(uploadDir, { recursive: true });
+            console.log("Upload directory exists or created:", uploadDir);
+        } catch (mkdirError) {
+            console.error("Error creating upload directory:", mkdirError);
+            return res.status(500).json({ error: "Failed to create upload directory" });
+        }
+
+        const form = formidable({
             uploadDir: uploadDir,
+            maxFileSize: Infinity,
             keepExtensions: true,
+            filename: (name, ext, part, form) => {
+                // Génère un nom de fichier unique
+                return `${Date.now()}-${part.originalFilename}`;
+            }
         });
 
-        form.parse(req, async (err, fields, files) => {
-            if (err) {
-                console.error("Error parsing form:", err);
-                return res.status(500).json({ error: "Failed to upload file" });
-            }
+        // Promisifier form.parse
+        const parseForm = () => {
+            return new Promise((resolve, reject) => {
+                form.parse(req, (err, fields, files) => {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        resolve({ fields, files });
+                    }
+                });
+            });
+        };
 
-            const file = files.file;
+        try {
+            const { fields, files } = await parseForm();
+            console.log("Parsed fields:", fields);
+            console.log("Parsed files:", files);
+
+            // **Assurez-vous que le nom correspond**
+            const file = Array.isArray(files.file) ? files.file[0] : files.file;
+
+            console.log("Processed file:", file);
+
             if (!file) {
+                console.error("No file found in upload.");
                 return res.status(400).json({ error: "No file uploaded" });
             }
 
-            const filePath = file.filepath;
-            const originalFileName = file.originalFilename;
-            const fileExt = path.extname(originalFileName).toLowerCase();
-            const baseName = path.basename(originalFileName, fileExt);
+            const newFilename = file.newFilename || file.originalFilename;
+            if (!newFilename) {
+                console.error("Neither newFilename nor originalFilename is defined.");
+                return res.status(400).json({ error: "Invalid file data" });
+            }
 
-            // Types de fichiers supportant la conversion
-            const convertibleTypes = [
-                'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // DOCX
-                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // XLSX
-                'application/msword', // DOC
-                'application/vnd.ms-excel', // XLS
-                // Ajoutez d'autres types si nécessaire
-            ];
+            const filePath = path.join(uploadDir, newFilename);
+            console.log("File path:", filePath);
 
-            let pdfFilePath = '';
+            // **Formidable déplace déjà le fichier dans uploadDir, donc rename n'est pas nécessaire**
+            // Si vous souhaitez le déplacer ailleurs, décommentez et ajustez le code ci-dessous
+            /*
+            const finalDir = path.join(process.cwd(), "uploads"); // Exemple
+            await fsPromises.mkdir(finalDir, { recursive: true });
+            const finalPath = path.join(finalDir, newFilename);
+            await fsPromises.rename(file.filepath, finalPath);
+            */
 
+            // Insérer dans MongoDB
             try {
-                // Vérifier si le fichier est convertible
-                if (convertibleTypes.includes(file.mimetype) || ['.docx', '.xlsx', '.doc', '.xls'].includes(fileExt)) {
-                    const input = await fsPromises.readFile(filePath);
-                    const outputFormat = 'pdf';
+                const result = await collection.insertOne({
+                    fileName: file.originalFilename,
+                    filePath: filePath,
+                    uploadDate: new Date()
+                });
 
-                    const pdf = await new Promise((resolve, reject) => {
-                        libre.convert(input, `.${outputFormat}`, undefined, (err, done) => {
-                            if (err) {
-                                reject(err);
-                            }
-                            resolve(done);
-                        });
-                    });
-
-                    // Définir le chemin pour le fichier PDF converti
-                    pdfFilePath = path.join(uploadDir, `${baseName}.pdf`);
-
-                    // Sauvegarder le PDF
-                    await fsPromises.writeFile(pdfFilePath, pdf);
-
-                    // Optionnel : Supprimer le fichier original après conversion
-                    await fsPromises.unlink(filePath);
-                } else {
-                    // Si le fichier n'est pas convertible, le laisser tel quel
-                    pdfFilePath = filePath;
-                }
-
-                // Connexion à MongoDB
-                await client.connect();
-                const database = client.db("bourbon");
-                const collection = database.collection("files");
-
-                // Préparer les données à insérer
-                const fileData = {
-                    originalFileName: originalFileName,
-                    storedFileName: path.basename(pdfFilePath),
-                    filePath: `/uploads/${path.basename(pdfFilePath)}`,
-                    fileType: 'application/pdf',
-                    uploadDate: new Date(),
-                };
-
-                // Insérer dans la base de données
-                const result = await collection.insertOne(fileData);
+                console.log("File inserted into DB with ID:", result.insertedId);
 
                 return res.status(200).json({
-                    message: "File uploaded and converted successfully",
-                    fileUrl: fileData.filePath,
+                    message: "File uploaded successfully and saved to database",
+                    filePath,
                     databaseId: result.insertedId
                 });
-            } catch (conversionError) {
-                console.error("Error during file conversion or saving:", conversionError);
-                return res.status(500).json({ error: "Failed to convert or save the file" });
-            } finally {
-                await client.close();
+            } catch (dbError) {
+                console.error("Error saving to database:", dbError);
+                return res.status(500).json({ error: "Failed to save file information to database" });
             }
-        });
-    } else if (req.method === 'GET') {
-        // Gérer la récupération des fichiers
+
+        } catch (error) {
+            console.error("Error during file upload:", error);
+            return res.status(500).json({ error: "Failed to upload file" });
+        } finally {
+            try {
+                await client.close();
+            } catch (closeError) {
+                console.error("Error closing MongoDB connection:", closeError);
+            }
+        }
+
+    } else if (req.method === "GET") {
+        // Gérer la méthode GET
         try {
-            await client.connect();
-            const database = client.db("bourbon");
-            const collection = database.collection("files");
-
-            const files = await collection.find({}).toArray();
-
+            const files = await collection.find().toArray();
             return res.status(200).json(files);
         } catch (error) {
             console.error("Error fetching files:", error);
             return res.status(500).json({ error: "Failed to fetch files" });
         } finally {
-            await client.close();
+            try {
+                await client.close();
+            } catch (closeError) {
+                console.error("Error closing MongoDB connection:", closeError);
+            }
         }
-    } else if (req.method === 'DELETE') {
-        const { id } = req.query;
-        if (!id) {
-            return res.status(400).json({ error: 'File ID is missing' });
+    } else if (req.method === "PUT") {
+        const { id, newFileName } = req.body;
+        if (!id || !newFileName) {
+            return res.status(400).json({ error: "Missing id or newFileName" });
         }
 
         try {
-            await client.connect();
-            const database = client.db("bourbon");
-            const collection = database.collection("files");
+            const result = await collection.updateOne(
+                { _id: new ObjectId(id) },
+                { $set: { fileName: newFileName } }
+            );
 
-            // Trouver le fichier dans la base de données
-            const file = await collection.findOne({ _id: new MongoClient.ObjectId(id) });
+            if (result.matchedCount === 0) {
+                return res.status(404).json({ error: "File not found" });
+            }
+
+            return res.status(200).json({ message: "File updated successfully" });
+        } catch (error) {
+            console.error("Error updating file:", error);
+            return res.status(500).json({ error: "Failed to update file" });
+        } finally {
+            try {
+                await client.close();
+            } catch (closeError) {
+                console.error("Error closing MongoDB connection:", closeError);
+            }
+        }
+    } else if (req.method === "DELETE") {
+        const { id } = req.query;
+        if (!id) {
+            return res.status(400).json({ error: "Missing file id" });
+        }
+
+        try {
+            const file = await collection.findOne({ _id: new ObjectId(id) });
             if (!file) {
                 return res.status(404).json({ error: "File not found" });
             }
 
-            // Supprimer le fichier du système de fichiers
-            const absoluteFilePath = path.join(process.cwd(), 'public', file.filePath);
-            await fsPromises.unlink(absoluteFilePath).catch(err => console.error("Error deleting file from disk:", err));
-
-            // Supprimer le document de la base de données
-            await collection.deleteOne({ _id: new MongoClient.ObjectId(id) });
+            await fsPromises.unlink(file.filePath);
+            await collection.deleteOne({ _id: new ObjectId(id) });
 
             return res.status(200).json({ message: "File deleted successfully" });
         } catch (error) {
             console.error("Error deleting file:", error);
-            return res.status(500).json({ error: "Failed to delete the file" });
+            return res.status(500).json({ error: "Failed to delete file" });
         } finally {
-            await client.close();
-        }
-    } else if (req.method === 'PUT') {
-        const { id, newFileName } = JSON.parse(req.body);
-        if (!id || !newFileName) {
-            return res.status(400).json({ error: 'Missing parameters' });
-        }
-
-        try {
-            await client.connect();
-            const database = client.db("bourbon");
-            const collection = database.collection("files");
-
-            // Trouver le fichier dans la base de données
-            const file = await collection.findOne({ _id: new MongoClient.ObjectId(id) });
-            if (!file) {
-                return res.status(404).json({ error: "File not found" });
+            try {
+                await client.close();
+            } catch (closeError) {
+                console.error("Error closing MongoDB connection:", closeError);
             }
-
-            const oldPath = path.join(process.cwd(), 'public', file.filePath);
-            const newStoredFileName = `${newFileName}.pdf`; // Assurez-vous que c'est un PDF
-            const newPath = path.join(uploadDir, newStoredFileName);
-
-            // Renommer le fichier sur le système de fichiers
-            await fsPromises.rename(oldPath, newPath);
-
-            // Mettre à jour les informations dans la base de données
-            await collection.updateOne(
-                { _id: new MongoClient.ObjectId(id) },
-                { $set: { storedFileName: newStoredFileName, filePath: `/uploads/${newStoredFileName}` } }
-            );
-
-            return res.status(200).json({ message: "File renamed successfully", fileUrl: `/uploads/${newStoredFileName}` });
-        } catch (error) {
-            console.error("Error renaming file:", error);
-            return res.status(500).json({ error: "Failed to rename the file" });
-        } finally {
-            await client.close();
         }
     } else {
-        res.setHeader('Allow', ['POST', 'GET', 'DELETE', 'PUT']);
+        res.setHeader("Allow", ["POST", "GET", "PUT", "DELETE"]);
         return res.status(405).end(`Method ${req.method} Not Allowed`);
     }
 }
