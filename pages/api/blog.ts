@@ -1,10 +1,28 @@
-import { getBlog } from "@/lib/blog.service";
+import { createBlog, getBlog } from "@/lib/blog.service";
 import { NextApiRequest, NextApiResponse } from "next";
+import { z } from "zod";
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse,
-) {
-  const blogs = await getBlog();
-  return res.json(blogs);
+const schema = z.object({
+  title: z.string(),
+  content: z.string(),
+});
+
+export default async function handler(req: any, res: NextApiResponse) {
+  switch (req.method) {
+    case "GET": {
+      const data = await getBlog();
+      return res.json(data);
+    }
+    case "POST": {
+      try {
+        const parsed = schema.parse(req.body);
+        const data = await createBlog(parsed);
+        return res.json(data);
+      } catch (err) {
+        res.json({
+          error: "Une erreur est survenue pendant la création du blog",
+        });
+      }
+    }
+  }
 }

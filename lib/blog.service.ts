@@ -1,8 +1,8 @@
 import client from "@/lib/mongodb";
-import { Document, WithId } from "mongodb";
+import { Document, InsertOneResult, WithId } from "mongodb";
 
 export type Blog = {
-  id: any;
+  id?: any;
   title: string;
   content: string;
 };
@@ -15,13 +15,27 @@ function blogBuilder(data: WithId<Document>): Blog {
   };
 }
 
-export async function getBlog(): Promise<Blog[]> {
-  const blogCollection = client.db().collection("blogs");
-  const data = await blogCollection.find().toArray();
+export async function getBlog() {
+  try {
+    const blogCollection = client.db().collection("blogs");
+    const data = await blogCollection.find().toArray();
 
-  const blogs: Blog[] = [];
-  data.forEach((d) => {
-    blogs.push(blogBuilder(d));
-  });
-  return blogs;
+    const blogs: Blog[] = [];
+    data.forEach((d) => {
+      blogs.push(blogBuilder(d));
+    });
+    return { data: blogs };
+  } catch (err) {
+    return { error: "Database connection error" };
+  }
+}
+
+export async function createBlog(blog: Blog) {
+  try {
+    const blogCollection = client.db().collection("blogs");
+    await blogCollection.insertOne(blog);
+    return { data: blog };
+  } catch (err) {
+    return { error: "Database connection error" };
+  }
 }
