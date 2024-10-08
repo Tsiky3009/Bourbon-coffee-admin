@@ -4,8 +4,8 @@ import { Inter } from "next/font/google";
 import client from "@/lib/mongodb";
 //import type { InferGetServerSidePropsType, GetServerSideProps } from "next";
 import Head from "next/head";
-import Navbar from "@/components/navbar"
-import  style  from "@/pages/styles/home.module.css";
+import Navbar from "@/components/navbar";
+import style from "@/pages/styles/home.module.css";
 
 /*type ConnectionStatus = {
   isConnected: boolean;
@@ -29,19 +29,17 @@ const inter = Inter({ subsets: ["latin"] });
   }
 };*/
 
-export default function Home(/*{
-  isConnected,
-}: InferGetServerSidePropsType<typeof getServerSideProps>*/) {
+export default function Home() {
   return (
     <>
       <div className={style.body}>
         <div className={style.column_1}>
-          <Navbar/>
+          <Navbar />
         </div>
         <div className={style.column_2}>
           <h1>Hello</h1>
         </div>
-      </div>  
+      </div>
     </>
   );
 }
