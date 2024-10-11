@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import styles from "./styles/document-viewer.module.css";
 
 type Props = {
@@ -7,11 +7,15 @@ type Props = {
   fileType?: string;
 };
 
-export default function DocumentViewer({ fileUrl, local = false, fileType }: Props) {
+export default function DocumentViewer({
+  fileUrl,
+  local = false,
+  fileType,
+}: Props) {
   const renderContent = () => {
     if (local) {
       // Pour les fichiers locaux
-      if (fileType === 'application/pdf' || fileUrl.endsWith('.pdf')) {
+      if (fileType === "application/pdf" || fileUrl.endsWith(".pdf")) {
         return (
           <embed
             src={fileUrl}
@@ -22,10 +26,12 @@ export default function DocumentViewer({ fileUrl, local = false, fileType }: Pro
           />
         );
       } else if (
-        fileType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
-        fileUrl.endsWith('.docx') ||
-        fileType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
-        fileUrl.endsWith('.xlsx')
+        fileType ===
+          "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
+        fileUrl.endsWith(".docx") ||
+        fileType ===
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ||
+        fileUrl.endsWith(".xlsx")
       ) {
         // Utilisation de Google Docs Viewer pour DOCX et XLSX
         return (
@@ -35,12 +41,24 @@ export default function DocumentViewer({ fileUrl, local = false, fileType }: Pro
             frameBorder="0"
           />
         );
-      } else if (fileType?.startsWith('image/')) {
-        return <img src={fileUrl} alt="Preview" style={{ maxWidth: '100%', maxHeight: '600px' }} />;
+      } else if (fileType?.startsWith("image/")) {
+        return (
+          <img
+            src={fileUrl}
+            alt="Preview"
+            style={{ maxWidth: "100%", maxHeight: "600px" }}
+          />
+        );
       } else {
         return (
           <div>
-            <p>Prévisualisation non disponible pour ce type de fichier. Veuillez <a href={fileUrl} download>Télécharger</a> le fichier pour le voir.</p>
+            <p>
+              Prévisualisation non disponible pour ce type de fichier. Veuillez{" "}
+              <a href={fileUrl} download>
+                Télécharger
+              </a>{" "}
+              le fichier pour le voir.
+            </p>
           </div>
         );
       }
@@ -56,9 +74,5 @@ export default function DocumentViewer({ fileUrl, local = false, fileType }: Pro
     }
   };
 
-  return (
-    <div className={styles.documentViewer}>
-      {renderContent()}
-    </div>
-  );
+  return <div className={styles.documentViewer}>{renderContent()}</div>;
 }

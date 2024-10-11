@@ -4,9 +4,9 @@ import { Button } from "@/components/ui/button";
 
 export default function Navbar() {
   return (
-    <aside className="bg-gray-800 text-white w-64 min-h-screen transition-all duration-300 ease-in-out">
+    <aside className="bg-[#18181b] text-white min-w-56 w-56 max-w-56 min-h-screen transition-all duration-300 ease-in-out">
       <div className="p-4">
-        <h1 className="text-2xl font-semibold">Dashboard</h1>
+        <h1 className="text-2xl font-semibold">Bourbon Coffee</h1>
       </div>
       <nav className="mt-4">
         <Link href={"/"}>

@@ -1,9 +1,26 @@
 import { useState, useEffect } from "react";
-import Navbar from "../../components/navbar";
 import style from "./styles/partenaire.module.css";
 import Image from "next/image";
-import Delete from "../../public/trash.png";
-import Edit from "../../public/pencil.png";
+import AdminLayout from "@/components/AdminLayout";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Table,
+  TableHeader,
+  TableRow,
+  TableCell,
+  TableBody,
+  TableHead,
+} from "@/components/ui/table";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
+import { Pen, Trash, MoreHorizontal } from "lucide-react";
 
 export default function Partenaires() {
   const [nom, setNom] = useState("");
@@ -125,38 +142,69 @@ export default function Partenaires() {
   };
 
   return (
-    <>
-      <div className={style.body}>
-        <div className={style.column_1}>
-          <Navbar />
+    <AdminLayout>
+      <div className="flex w-full justify-between gap-4 p-4">
+        <div className="w-full">
+          {isLoading ? (
+            <p>Chargement des partenaires...</p>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Nom</TableHead>
+                  <TableHead>Lien</TableHead>
+                  <TableHead>Description</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {partenaires.map((partenaire, index) => (
+                  <TableRow key={partenaire._id || index}>
+                    <TableCell>{partenaire.nom}</TableCell>
+                    <TableCell>{partenaire.lien}</TableCell>
+                    <TableCell>{partenaire.description}</TableCell>
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger>
+                          <MoreHorizontal />
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="w-56">
+                          <DropdownMenuItem
+                            onClick={() => handleEdit(partenaire)}
+                          >
+                            <Pen className="mr-2 h-4 w-4" />
+                            <span>Renommer</span>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            className="text-red-500"
+                            onClick={() => handleDelete(partenaire._id)}
+                          >
+                            <Trash className="mr-2 h-4 w-4" />
+                            <span>Supprimer</span>
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
         </div>
-        <div className={style.column_2}>
-          <div className={style.form}>
-            <form onSubmit={handleSubmit} encType="multipart/form-data">
-              <label htmlFor="id_nom">Nom</label>
-              <input
-                type="text"
-                id="id_nom"
-                value={nom}
-                onChange={(e) => setNom(e.target.value)}
+        <div class="w-full">
+          <form
+            onSubmit={handleSubmit}
+            encType="multipart/form-data"
+            className="flex flex-col gap-4"
+          >
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="fileupload">Logo</Label>
+              <Input
+                type="file"
+                name="fileupload"
+                id="fileupload"
+                onChange={handleFileChange}
               />
-
-              <label htmlFor="id_lien">Lien</label>
-              <input
-                type="text"
-                id="id_lien"
-                value={lien}
-                onChange={(e) => setLien(e.target.value)}
-              />
-
-              <label htmlFor="id_desc">Descriptions</label>
-              <textarea
-                name="input_desc"
-                id="id_desc"
-                value={desc}
-                onChange={(e) => setDesc(e.target.value)}
-              ></textarea>
-
               {preview && (
                 <div>
                   <p>Image Preview:</p>
@@ -167,75 +215,49 @@ export default function Partenaires() {
                   />
                 </div>
               )}
+            </div>
 
-              <input
-                type="file"
-                name="fileupload"
-                id="fileupload"
-                onChange={handleFileChange}
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="id_nom">Nom</Label>
+              <Input
+                type="text"
+                id="id_nom"
+                value={nom}
+                onChange={(e) => setNom(e.target.value)}
               />
+            </div>
 
-              <button type="submit" disabled={isLoading}>
-                {isLoading
-                  ? "Enregistrement..."
-                  : editingId
-                    ? "Mettre à jour"
-                    : "Enregistrer"}
-              </button>
-            </form>
-            {error && <p className={style.error}>{error}</p>}
-          </div>
-          <div className={style.list}>
-            {isLoading ? (
-              <p>Chargement des partenaires...</p>
-            ) : (
-              <table className={style.list_partenaire}>
-                <thead>
-                  <tr className={style.t_head}>
-                    <th>Nom</th>
-                    <th>Lien</th>
-                    <th>Description</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {partenaires.map((partenaire, index) => (
-                    <tr className={style.items} key={partenaire._id || index}>
-                      <td>{partenaire.nom}</td>
-                      <td>{partenaire.lien}</td>
-                      <td>{partenaire.description}</td>
-                      <td className={style.action}>
-                        <button
-                          onClick={() => handleDelete(partenaire._id)}
-                          className={style.delete}
-                        >
-                          <Image
-                            src={Delete}
-                            width={20}
-                            height={20}
-                            alt="delete_icon"
-                          />
-                        </button>
-                        <button
-                          onClick={() => handleEdit(partenaire)}
-                          className={style.edit}
-                        >
-                          <Image
-                            src={Edit}
-                            width={20}
-                            height={20}
-                            alt="edit_icon"
-                          />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </div>
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="id_lien">Lien</Label>
+              <Input
+                type="text"
+                id="id_lien"
+                value={lien}
+                onChange={(e) => setLien(e.target.value)}
+              />
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="id_desc">Descriptions</Label>
+              <Textarea
+                name="input_desc"
+                id="id_desc"
+                value={desc}
+                onChange={(e) => setDesc(e.target.value)}
+              ></Textarea>
+            </div>
+
+            <Button type="submit" disabled={isLoading}>
+              {isLoading
+                ? "Enregistrement..."
+                : editingId
+                  ? "Mettre à jour"
+                  : "Enregistrer"}
+            </Button>
+          </form>
+          {error && <p className={style.error}>{error}</p>}
         </div>
       </div>
-    </>
+    </AdminLayout>
   );
 }
