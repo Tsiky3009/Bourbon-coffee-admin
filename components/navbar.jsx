@@ -22,7 +22,7 @@ export default function Navbar() {
             variant="ghost"
             className="w-full justify-start text-white hover:bg-gray-700 hover:text-white"
           >
-            Edito
+            Editos
           </Button>
         </Link>
         <Link href="partenaires">
@@ -38,7 +38,7 @@ export default function Navbar() {
             variant="ghost"
             className="w-full justify-start text-white hover:bg-gray-700 hover:text-white"
           >
-            Blog
+            Articles
           </Button>
         </Link>
       </nav>

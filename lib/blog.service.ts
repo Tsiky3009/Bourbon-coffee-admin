@@ -4,6 +4,7 @@ import { Document, InsertOneResult, WithId } from "mongodb";
 export type Blog = {
   id?: any;
   title: string;
+  exerpt?: string;
   content: string;
 };
 

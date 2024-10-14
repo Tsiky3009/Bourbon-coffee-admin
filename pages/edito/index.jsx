@@ -17,8 +17,15 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import AdminLayout from "@/components/AdminLayout";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 
 export default function Edito() {
   const [filePreview, setFilePreview] = useState(null);
@@ -26,7 +33,9 @@ export default function Edito() {
   const [fileURL, setFileURL] = useState(null);
   const [files, setFiles] = useState([]);
   const [editingFile, setEditingFile] = useState(null);
+  const [fetchError, setFetchError] = useState(false);
   const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     fetchFiles();
@@ -34,11 +43,19 @@ export default function Edito() {
 
   const fetchFiles = async () => {
     try {
+      setIsLoading(true);
       const response = await fetch("/api/edito");
       const data = await response.json();
+      if (response.status === 500) {
+        setFetchError(true);
+        return;
+      }
+
       setFiles(data);
     } catch (error) {
-      console.error("Error fetching files:", error);
+      setFetchError(true);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -114,76 +131,93 @@ export default function Edito() {
 
   return (
     <AdminLayout>
-      <div className="flex justify-between gap-4 w-full p-2">
-        <div className="w-full">
-          <h1 className="font-semibold text-lg mt-2">Mes editos</h1>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Nom du fichier</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {files.map((file) => (
-                <TableRow key={file._id}>
-                  <TableCell>
-                    {editingFile && editingFile._id === file._id ? (
-                      <Input
-                        value={editingFile.fileName}
-                        onChange={(e) =>
-                          setEditingFile({
-                            ...editingFile,
-                            fileName: e.target.value,
-                          })
-                        }
-                      />
-                    ) : (
-                      file.fileName
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    {editingFile && editingFile._id === file._id ? (
-                      <Button onClick={handleSaveEdit}>Renommer</Button>
-                    ) : (
-                      <DropdownMenu>
-                        <DropdownMenuTrigger>
-                          <MoreHorizontal />
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent className="w-56">
-                          <DropdownMenuItem onClick={() => handleEdit(file)}>
-                            <Pen className="mr-2 h-4 w-4" />
-                            <span>Renommer</span>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            className="text-red-500"
-                            onClick={() => handleDelete(file._id)}
-                          >
-                            <Trash className="mr-2 h-4 w-4" />
-                            <span>Supprimer</span>
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    )}
-                  </TableCell>
+      <div className="w-full p-4">
+        <div className="flex justify-between">
+          <h1 className="text-xl font-semibold">Editos</h1>
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button>Uploader un fichier</Button>
+            </SheetTrigger>
+            <SheetContent className="!w-[640px]">
+              <SheetHeader>
+                <SheetTitle>Uploader un fichier</SheetTitle>
+                <SheetDescription>
+                  Veuillez séléctionner le ficher
+                </SheetDescription>
+              </SheetHeader>
+              <div className="flex gap-2 my-2">
+                <Input type="file" onChange={handleFileChange} />
+                {selectedFile && filePreview && (
+                  <Button onClick={handleUpload}>Uploader le fichier</Button>
+                )}
+              </div>
+              <div className="max-h-40">
+                {error && <p style={{ color: "red" }}>{error}</p>}
+                {filePreview}
+              </div>
+            </SheetContent>
+          </Sheet>
+        </div>
+        {isLoading ? (
+          <p>Chargement des editos...</p>
+        ) : fetchError ? (
+          <p>Une erreur s'est produite pendant le chargement des editos...</p>
+        ) : (
+          <div className="w-full">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Nom du fichier</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-        <div className="w-full bg-[#171717] p-2 rounded-md">
-          <h2 className="mb-2 font-semibold text-lg">Uploader un edito</h2>
-          <Label>Veuillez séléctionner le fichier</Label>
-          <div className="flex gap-2 mb-2">
-            <Input type="file" onChange={handleFileChange} />
-            {selectedFile && filePreview && (
-              <Button onClick={handleUpload}>Uploader le fichier</Button>
-            )}
+              </TableHeader>
+              <TableBody>
+                {files.map((file) => (
+                  <TableRow key={file._id}>
+                    <TableCell>
+                      {editingFile && editingFile._id === file._id ? (
+                        <Input
+                          value={editingFile.fileName}
+                          onChange={(e) =>
+                            setEditingFile({
+                              ...editingFile,
+                              fileName: e.target.value,
+                            })
+                          }
+                        />
+                      ) : (
+                        file.fileName
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {editingFile && editingFile._id === file._id ? (
+                        <Button onClick={handleSaveEdit}>Renommer</Button>
+                      ) : (
+                        <DropdownMenu>
+                          <DropdownMenuTrigger>
+                            <MoreHorizontal />
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent className="w-56">
+                            <DropdownMenuItem onClick={() => handleEdit(file)}>
+                              <Pen className="mr-2 h-4 w-4" />
+                              <span>Renommer</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              className="text-red-500"
+                              onClick={() => handleDelete(file._id)}
+                            >
+                              <Trash className="mr-2 h-4 w-4" />
+                              <span>Supprimer</span>
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </div>
-          <div className="max-h-40">
-            {error && <p style={{ color: "red" }}>{error}</p>}
-            {filePreview}
-          </div>
-        </div>
+        )}
       </div>
     </AdminLayout>
   );

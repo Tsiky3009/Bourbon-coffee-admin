@@ -21,6 +21,15 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import { Pen, Trash, MoreHorizontal } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 export default function Partenaires() {
   const [nom, setNom] = useState("");
@@ -143,10 +152,95 @@ export default function Partenaires() {
 
   return (
     <AdminLayout>
-      <div className="flex w-full justify-between gap-4 p-4">
-        <div className="w-full">
+      <div className="w-full p-4">
+        <div className="flex justify-between">
+          <h1 className="text-xl font-semibold">Nos partenaires</h1>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button>Ajouter un partenaire</Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle>Ajouter un nouveau partenaire</DialogTitle>
+                <DialogDescription>
+                  Veuillez entrer les informations sur le partenaire.
+                </DialogDescription>
+              </DialogHeader>
+
+              <form
+                onSubmit={handleSubmit}
+                encType="multipart/form-data"
+                className="flex flex-col gap-4"
+              >
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="fileupload">Logo</Label>
+                  <Input
+                    type="file"
+                    name="fileupload"
+                    id="fileupload"
+                    onChange={handleFileChange}
+                  />
+                  {preview && (
+                    <div>
+                      <p>Image Preview:</p>
+                      <img
+                        src={preview}
+                        alt="Image preview"
+                        style={{ width: "200px", height: "auto" }}
+                      />
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="id_nom">Nom</Label>
+                  <Input
+                    type="text"
+                    id="id_nom"
+                    value={nom}
+                    onChange={(e) => setNom(e.target.value)}
+                  />
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="id_lien">Lien</Label>
+                  <Input
+                    type="text"
+                    id="id_lien"
+                    value={lien}
+                    onChange={(e) => setLien(e.target.value)}
+                  />
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="id_desc">Descriptions</Label>
+                  <Textarea
+                    name="input_desc"
+                    id="id_desc"
+                    value={desc}
+                    onChange={(e) => setDesc(e.target.value)}
+                  ></Textarea>
+                </div>
+
+                <Button type="submit" disabled={isLoading}>
+                  {isLoading
+                    ? "Enregistrement..."
+                    : editingId
+                      ? "Mettre à jour"
+                      : "Enregistrer"}
+                </Button>
+              </form>
+            </DialogContent>
+          </Dialog>
+        </div>
+
+        <div className="w-full mt-4">
           {isLoading ? (
             <p>Chargement des partenaires...</p>
+          ) : error ? (
+            <p>
+              Une erreur s'est produite pendant le chargement des partenaires...
+            </p>
           ) : (
             <Table>
               <TableHeader>
@@ -190,72 +284,6 @@ export default function Partenaires() {
               </TableBody>
             </Table>
           )}
-        </div>
-        <div class="w-full">
-          <form
-            onSubmit={handleSubmit}
-            encType="multipart/form-data"
-            className="flex flex-col gap-4"
-          >
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="fileupload">Logo</Label>
-              <Input
-                type="file"
-                name="fileupload"
-                id="fileupload"
-                onChange={handleFileChange}
-              />
-              {preview && (
-                <div>
-                  <p>Image Preview:</p>
-                  <img
-                    src={preview}
-                    alt="Image preview"
-                    style={{ width: "200px", height: "auto" }}
-                  />
-                </div>
-              )}
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="id_nom">Nom</Label>
-              <Input
-                type="text"
-                id="id_nom"
-                value={nom}
-                onChange={(e) => setNom(e.target.value)}
-              />
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="id_lien">Lien</Label>
-              <Input
-                type="text"
-                id="id_lien"
-                value={lien}
-                onChange={(e) => setLien(e.target.value)}
-              />
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="id_desc">Descriptions</Label>
-              <Textarea
-                name="input_desc"
-                id="id_desc"
-                value={desc}
-                onChange={(e) => setDesc(e.target.value)}
-              ></Textarea>
-            </div>
-
-            <Button type="submit" disabled={isLoading}>
-              {isLoading
-                ? "Enregistrement..."
-                : editingId
-                  ? "Mettre à jour"
-                  : "Enregistrer"}
-            </Button>
-          </form>
-          {error && <p className={style.error}>{error}</p>}
         </div>
       </div>
     </AdminLayout>
