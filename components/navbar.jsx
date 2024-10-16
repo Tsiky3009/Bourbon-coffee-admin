@@ -25,7 +25,7 @@ export default function Navbar() {
             Editos
           </Button>
         </Link>
-        <Link href="partenaires">
+        <Link href="/partenaires">
           <Button
             variant="ghost"
             className="w-full justify-start text-white hover:bg-gray-700 hover:text-white"
@@ -33,7 +33,7 @@ export default function Navbar() {
             Partenaires
           </Button>
         </Link>
-        <Link href="blog">
+        <Link href="/blog">
           <Button
             variant="ghost"
             className="w-full justify-start text-white hover:bg-gray-700 hover:text-white"
