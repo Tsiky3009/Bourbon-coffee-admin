@@ -82,7 +82,7 @@ export default async function handler(req, res) {
       try {
         const result = await collection.insertOne({
           fileName: file.originalFilename,
-          filePath: filePath,
+          filePath: path.basename(filePath),
           uploadDate: new Date(),
         });
 
@@ -158,5 +158,3 @@ export default async function handler(req, res) {
     return res.status(405).end(`Method ${req.method} Not Allowed`);
   }
 }
-
-async function createUploadDir() {}
