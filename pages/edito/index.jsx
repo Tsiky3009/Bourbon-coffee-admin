@@ -45,13 +45,13 @@ export default function Edito() {
     try {
       setIsLoading(true);
       const response = await fetch("/api/edito");
-      const data = await response.json();
+      const result = await response.json();
       if (response.status === 500) {
         setFetchError(true);
         return;
       }
 
-      setFiles(data);
+      setFiles(result.data);
     } catch (error) {
       setFetchError(true);
     } finally {
