@@ -26,6 +26,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { toast } from "@/hooks/use-toast";
 
 export default function Edito() {
   const [filePreview, setFilePreview] = useState(null);
@@ -36,9 +37,11 @@ export default function Edito() {
   const [fetchError, setFetchError] = useState(false);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [activeEditoId, setActiveEditoId] = useState(null);
 
   useEffect(() => {
     fetchFiles();
+    getActiveEdito();
   }, []);
 
   const fetchFiles = async () => {
@@ -56,6 +59,22 @@ export default function Edito() {
       setFetchError(true);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const getActiveEdito = async () => {
+    try {
+      const res = await fetch("/api/edito/active");
+      const result = await res.json();
+      if (result.error) {
+        console.log("Failed to get active edito");
+        return;
+      }
+      if (result.editoId) {
+        setActiveEditoId(result.editoId);
+      }
+    } catch (error) {
+      console.log("Failed to get active edito");
     }
   };
 
@@ -84,12 +103,34 @@ export default function Edito() {
           body: formData,
         });
         const result = await res.json();
-        console.log(result);
         // Handle successful upload (e.g., show success message, refresh file list)
       } catch (error) {
         console.error("Error uploading file:", error);
         // Handle upload error (e.g., show error message)
       }
+    }
+  };
+
+  const activateEdito = async (editoId) => {
+    try {
+      const res = await fetch("/api/edito/active", {
+        method: "POST",
+        body: JSON.stringify({ editoId }),
+      });
+      const result = await res.json();
+      if (result.error || result.editoId === null) {
+        setActiveEditoId(null);
+        return;
+      }
+      if (result.editoId) {
+        setActiveEditoId(result.editoId);
+        toast({
+          title: "Edito activé",
+        });
+        return;
+      }
+    } catch (error) {
+      console.error("An error occured while activating edito");
     }
   };
 
@@ -173,7 +214,9 @@ export default function Edito() {
               <TableBody>
                 {files.map((file) => (
                   <TableRow key={file._id}>
-                    <TableCell>
+                    <TableCell
+                      className={activeEditoId === file._id && "text-green-500"}
+                    >
                       {editingFile && editingFile._id === file._id ? (
                         <Input
                           value={editingFile.fileName}
@@ -207,6 +250,12 @@ export default function Edito() {
                             >
                               <Trash className="mr-2 h-4 w-4" />
                               <span>Supprimer</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              className="text-red-500"
+                              onClick={() => activateEdito(file._id)}
+                            >
+                              Activate
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
