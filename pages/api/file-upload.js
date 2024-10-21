@@ -18,6 +18,7 @@ const client = new MongoClient(uri);
 export default async function handler(req, res) {
     let database, collection;
 
+    // connection au base de donnée sur cloud.mongodb
     try {
         await client.connect();
         database = client.db("bourbon");

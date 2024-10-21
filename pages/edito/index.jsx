@@ -5,6 +5,8 @@ import Delete from "../../public/trash.png"
 import Edit from "../../public/pencil.png"
 import Image from "next/image"
 import DocumentViewer from "@/components/DocumentViewer";
+import Succes from "@/public/succes.png"
+import Warning from "@/public/avertissement.png"
 
 export default function Edito() {
     const [filePreview, setFilePreview] = useState(null);
@@ -13,6 +15,11 @@ export default function Edito() {
     const [files, setFiles] = useState([]);
     const [editingFile, setEditingFile] = useState(null);
     const [error, setError] = useState(null);
+    const [succes, setSucces] = useState(false)
+    const [del, setDelete] = useState(false);
+    const [fileToDelete, setFileToDelete] = useState(null);
+    const [succesDel, setSuccesDel] = useState(false)
+
 
     useEffect(() => {
         fetchFiles();
@@ -60,6 +67,9 @@ export default function Edito() {
         const result = await res.json();
         console.log(result);
         // Handle successful upload (e.g., show success message, refresh file list)
+
+        //Upload succesful
+        setSucces(true)
       } catch (error) {
         console.error("Error uploading file:", error);
         // Handle upload error (e.g., show error message)
@@ -67,15 +77,26 @@ export default function Edito() {
     }
   };
 
-    const handleDelete = async (id) => {
+
+
+    const handleConfirmeDelete = async () => {
         try {
-            await fetch(`/api/file-upload?id=${id}`, {
+            await fetch(`/api/file-upload?id=${fileToDelete}`, {
                 method: 'DELETE',
-            });
+              });
+
             fetchFiles(); // Refresh the file list
+            setDelete(false)
+            setFileToDelete(null)
+            setSuccesDel(true)
         } catch (error) {
             console.error("Error deleting file:", error);
         }
+    }
+
+    const handleDelete = (id) => {
+        setFileToDelete(id)
+        setDelete(true)
     }
 
     const handleEdit = (file) => {
@@ -124,14 +145,12 @@ export default function Edito() {
                             <thead>
                                 <tr className={style.t_head}>
                                     <td>Nom</td>
-                                    <td></td>
-                                    <td></td>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody className={style.scrollable_body}>
                                 {files.map((file) => (
                                     <tr key={file._id}>
-                                        <td>
+                                        <td className={style.file_name}>
                                             {editingFile && editingFile._id === file._id ? (
                                                 <input 
                                                     value={editingFile.fileName}
@@ -162,6 +181,84 @@ export default function Edito() {
                     </div>
                 </div>
             </div>  
+
+            {/*Succes modal*/}
+            {succes && (
+                <div className={style.modal}>
+                    <div className={style.modal_content}>
+                        <div className={style.modal_title}>
+                            <h1>Succès</h1>
+                        </div>
+                        <div className={style.modal_body}>
+                            <p>Le fichier a été téléchargé avec succès !</p>
+                            <div className={style.logo_succes}>
+                                <Image 
+                                    src={Succes}
+                                    alt="icone succes"
+                                    width={100}
+                                    height={100}
+                                />
+                            </div>
+                            <button
+                                onClick={() => {
+                                setSucces(false); // Fermer le modal
+                                fetchFiles(); // Recharger la liste des fichiers
+                                }}
+                            >
+                                Fermer
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/*Warning modal on delete */}
+            {del && (
+                <div className={style.modal}>
+                    <div className={style.modal_content}>
+                        <div className={style.modal_title}>
+                            <h1>Confirmation de suppression</h1>
+                        </div>
+                        <div className={style.modal_body}>
+                            <p>Es-tu sûr de vouloir supprimer ce fichier ?</p>
+                            <div className={style.logo_succes}>
+                                <Image 
+                                    src={Warning}
+                                    alt="icone warning"
+                                    width={100}
+                                    height={100}
+                                />
+                            </div>
+                            <div className={style.modal_button_list}>
+                                <button onClick={handleConfirmeDelete}>Confirmer</button>
+                                <button onClick={() => setDelete(false)}>Annuler</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {/*Succes delete modal*/}
+            {succesDel && (
+                <div className={style.modal}>
+                    <div className={style.modal_content}>
+                        <div className={style.modal_title}>
+                            <h1>Succès</h1>
+                        </div>
+                        <div className={style.modal_body}>
+                            <p>Le fichier a été bien supprimer</p>
+                            <div className={style.logo_succes}>
+                                <Image 
+                                    src={Succes}
+                                    alt="icone succes"
+                                    width={100}
+                                    height={100}
+                                />
+                            </div>
+                            <button onClick={() => setSuccesDel(false)}>Fermer</button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </>
     )
 }

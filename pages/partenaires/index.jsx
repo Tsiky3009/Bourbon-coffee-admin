@@ -4,6 +4,8 @@ import style from "./styles/partenaire.module.css"
 import Image from "next/image"
 import Delete from "../../public/trash.png"
 import Edit from "../../public/pencil.png"
+import Succes from "@/public/succes.png"
+import Warning from "@/public/avertissement.png"
 
 export default function Partenaires(){
     const [nom, setNom] = useState('')
@@ -15,6 +17,10 @@ export default function Partenaires(){
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState(null)
     const [editingId, setEditingId] = useState(null)
+    const [succes, setSucces] = useState(false)
+    const [del, setDelete] = useState(false);
+    const [partenerToDelete, setPartenerToDelete] = useState(null);
+    const [succesDel, setSuccesDel] = useState(false)
 
     useEffect(() => {
         fetchPartenaires()
@@ -87,6 +93,7 @@ export default function Partenaires(){
             setFile(null)
             setPreview(null)
             setEditingId(null)
+            setSucces(true)
 
             // Refresh the list of partenaires
             await fetchPartenaires()
@@ -97,24 +104,29 @@ export default function Partenaires(){
         }
     }
 
-    const handleDelete = async (id) => {
-        if (window.confirm('Are you sure you want to delete this partenaire?')) {
-            setIsLoading(true)
-            try {
-                const response = await fetch(`/api/upload?id=${id}`, {
-                    method: 'DELETE'
-                })
-                if (!response.ok) {
-                    throw new Error('Failed to delete partenaire')
-                }
-                await fetchPartenaires()
-            } catch (err) {
-                setError(err.message)
-            } finally {
-                setIsLoading(false)
+    const handleDelete = (id) => {
+        setPartenerToDelete(id);
+        setDelete(true); // Show the warning modal
+    };
+
+    const handleConfirmeDelete = async () => {
+        setIsLoading(true);
+        try {
+            const response = await fetch(`/api/upload?id=${partenerToDelete}`, {
+                method: 'DELETE'
+            });
+            if (!response.ok) {
+                throw new Error('Failed to delete partenaire');
             }
+            await fetchPartenaires();
+            setSuccesDel(true); // Show success modal
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setIsLoading(false);
+            setDelete(false); // Close warning modal
         }
-    }
+    };
 
     const handleEdit = (partenaire) => {
         setEditingId(partenaire._id)
@@ -192,6 +204,83 @@ export default function Partenaires(){
                     </div>
                 </div>
             </div>
+            {/*Succes modal*/}
+            {succes && (
+                <div className={style.modal}>
+                    <div className={style.modal_content}>
+                        <div className={style.modal_title}>
+                            <h1>Succès</h1>
+                        </div>
+                        <div className={style.modal_body}>
+                            <p>Le partenaire a été téléchargé avec succès !</p>
+                            <div className={style.logo_succes}>
+                                <Image 
+                                    src={Succes}
+                                    alt="icone succes"
+                                    width={100}
+                                    height={100}
+                                />
+                            </div>
+                            <button
+                                onClick={() => {
+                                setSucces(false); // Fermer le modal
+                                fetchPartenaires(); // Recharger la liste des fichiers
+                                }}
+                            >
+                                Fermer
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/*Warning modal on delete */}
+            {del && (
+                <div className={style.modal}>
+                    <div className={style.modal_content}>
+                        <div className={style.modal_title}>
+                            <h1>Confirmation de suppression</h1>
+                        </div>
+                        <div className={style.modal_body}>
+                            <p>Es-tu sûr de vouloir supprimer cette partenaire ?</p>
+                            <div className={style.logo_succes}>
+                                <Image 
+                                    src={Warning}
+                                    alt="icone warning"
+                                    width={100}
+                                    height={100}
+                                />
+                            </div>
+                            <div className={style.modal_button_list}>
+                                <button onClick={handleConfirmeDelete}>Confirmer</button>
+                                <button onClick={() => setDelete(false)}>Annuler</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {/*Succes delete modal*/}
+            {succesDel && (
+                <div className={style.modal}>
+                    <div className={style.modal_content}>
+                        <div className={style.modal_title}>
+                            <h1>Succès</h1>
+                        </div>
+                        <div className={style.modal_body}>
+                            <p>Le partenaire a été bien supprimer</p>
+                            <div className={style.logo_succes}>
+                                <Image 
+                                    src={Succes}
+                                    alt="icone succes"
+                                    width={100}
+                                    height={100}
+                                />
+                            </div>
+                            <button onClick={() => setSuccesDel(false)}>Fermer</button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </>
     )
 }
