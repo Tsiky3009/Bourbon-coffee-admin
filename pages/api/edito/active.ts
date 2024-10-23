@@ -1,4 +1,5 @@
 import client from "@/lib/mongodb";
+import { ObjectId } from "mongodb";
 import { NextApiRequest, NextApiResponse } from "next";
 export default async function handler(
   req: NextApiRequest,
@@ -11,7 +12,12 @@ export default async function handler(
       if (currentActiveEdito === null) {
         return res.json({ error: "No active edito" });
       }
-      return res.json({ editoId: currentActiveEdito.editoId });
+      const edito = await client
+        .db()
+        .collection("files")
+        .findOne({ _id: new ObjectId(currentActiveEdito.editoId) });
+      console.log(edito);
+      return res.json({ editoId: currentActiveEdito.editoId, edito });
     } catch (error) {
       return res.status(500).json({ error: "Internal Server Error" });
     }
