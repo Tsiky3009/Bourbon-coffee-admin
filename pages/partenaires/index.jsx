@@ -42,9 +42,7 @@ export default function Partenaires() {
   const [error, setError] = useState(null);
   const [editingId, setEditingId] = useState(null);
 
-  useEffect(() => {
-    fetchPartenaires();
-  }, []);
+  const path = "/uploads/"
 
   const fetchPartenaires = async () => {
     setIsLoading(true);
@@ -54,6 +52,7 @@ export default function Partenaires() {
         throw new Error("Failed to fetch partenaires");
       }
       const data = await response.json();
+      console.log(data)
       setPartenaires(data);
     } catch (err) {
       setError(err.message);
@@ -149,6 +148,10 @@ export default function Partenaires() {
     setDesc(partenaire.description);
     setPreview(null); // Reset preview as we don't have the image URL
   };
+
+  useEffect(() => {
+    fetchPartenaires();
+  }, []);
 
   return (
     <AdminLayout>
@@ -248,6 +251,7 @@ export default function Partenaires() {
                   <TableHead>Nom</TableHead>
                   <TableHead>Lien</TableHead>
                   <TableHead>Description</TableHead>
+                  {/*<TableHead>Logo</TableHead>*/}
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -257,6 +261,14 @@ export default function Partenaires() {
                     <TableCell>{partenaire.nom}</TableCell>
                     <TableCell>{partenaire.lien}</TableCell>
                     <TableCell>{partenaire.description}</TableCell>
+                    {/*<TableCell>
+                      <Image
+                        src={`${path}${partenaire.fileName}`}
+                        alt="logo partenaire"
+                        width={100}
+                        height={100}
+                      />
+                    </TableCell>*/}
                     <TableCell>
                       <DropdownMenu>
                         <DropdownMenuTrigger>
