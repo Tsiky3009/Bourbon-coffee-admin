@@ -43,7 +43,7 @@ export default function Partenaires() {
   const [editingId, setEditingId] = useState(null);
 
   useEffect(() => {
-    fetchPartenaires();
+    // fetchPartenaires();
   }, []);
 
   const fetchPartenaires = async () => {
@@ -83,8 +83,8 @@ export default function Partenaires() {
     setError(null);
 
     const formData = new FormData();
-    formData.append("nom", nom);
-    formData.append("lien", lien);
+    formData.append("name", nom);
+    formData.append("link", lien);
     formData.append("description", desc);
     if (file) {
       formData.append("fileupload", file);

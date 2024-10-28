@@ -41,14 +41,17 @@ export default async function handler(req, res) {
           return res.status(500).json({ error: "Error parsing the form" });
         }
 
-        const { nom, lien, description } = fields;
-        const file = files.fileupload;
+        if (!fields["name"] || !fields["link"] || !fields["description"]) {
+          return res.json({ error: "Incomplete body" });
+        }
+
+        const file = files ? files.fileupload[0] : null;
 
         try {
           let partnerData = {
-            nom,
-            lien,
-            description,
+            name: fields["name"][0],
+            link: fields["link"][0],
+            description: fields["description"][0],
           };
 
           if (file) {
@@ -107,7 +110,7 @@ function buildForm() {
     keepExtensions: true,
   });
 
-  const uploadDir = path.join(process.cwd(), "/public/uploads");
+  const uploadDir = path.join(process.cwd(), "/public/file_uploads");
 
   if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
