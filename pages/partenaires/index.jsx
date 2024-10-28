@@ -43,7 +43,7 @@ export default function Partenaires() {
   const [editingId, setEditingId] = useState(null);
 
   useEffect(() => {
-    // fetchPartenaires();
+    fetchPartenaires();
   }, []);
 
   const fetchPartenaires = async () => {
@@ -254,8 +254,8 @@ export default function Partenaires() {
               <TableBody>
                 {partenaires.map((partenaire, index) => (
                   <TableRow key={partenaire._id || index}>
-                    <TableCell>{partenaire.nom}</TableCell>
-                    <TableCell>{partenaire.lien}</TableCell>
+                    <TableCell>{partenaire.name}</TableCell>
+                    <TableCell>{partenaire.link}</TableCell>
                     <TableCell>{partenaire.description}</TableCell>
                     <TableCell>
                       <DropdownMenu>
