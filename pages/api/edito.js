@@ -145,7 +145,15 @@ export default async function handler(req, res) {
         return res.status(404).json({ error: "File not found" });
       }
 
-      await fsPromises.unlink(path.join(UPLOAD_DIR, file.filePath));
+      const fileExists =
+        (await fsPromises.readdir(UPLOAD_DIR)).filter(
+          (f) => f === file.filePath,
+        ).length === 1;
+
+      if (fileExists) {
+        await fsPromises.unlink(path.join(UPLOAD_DIR, file.filePath));
+      }
+
       await collection.deleteOne({ _id: new ObjectId(id) });
 
       return res.status(200).json({ message: "File deleted successfully" });
