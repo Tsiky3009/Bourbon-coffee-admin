@@ -23,6 +23,7 @@ import {
 import { Pen, Trash, MoreHorizontal } from "lucide-react";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -30,6 +31,17 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 import BarLoader from "react-spinners/BarLoader"
 
@@ -132,21 +144,19 @@ export default function Partenaires() {
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm("Are you sure you want to delete this partenaire?")) {
-      setIsLoading(true);
-      try {
-        const response = await fetch(`/api/partners?id=${id}`, {
-          method: "DELETE",
-        });
-        if (!response.ok) {
-          throw new Error("Failed to delete partenaire");
-        }
-        await fetchPartenaires();
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setIsLoading(false);
+    setIsLoading(true);
+    try {
+      const response = await fetch(`/api/partners?id=${id}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) {
+        throw new Error("Failed to delete partenaire");
       }
+      await fetchPartenaires();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -171,7 +181,7 @@ export default function Partenaires() {
             <DialogTrigger asChild>
               <Button>Ajouter un partenaire</Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent className="sm:max-w-[425px] max-h-[80vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Ajouter un nouveau partenaire</DialogTitle>
                 <DialogDescription>
@@ -198,7 +208,7 @@ export default function Partenaires() {
                       <img
                         src={preview}
                         alt="Image preview"
-                        style={{ width: "200px", height: "auto" }}
+                        style={{ width: "100px", height: "100" }}
                       />
                     </div>
                   )}
@@ -233,14 +243,42 @@ export default function Partenaires() {
                     onChange={(e) => setDesc(e.target.value)}
                   ></Textarea>
                 </div>
-
-                <Button type="submit" disabled={isLoading}>
-                  {isLoading
-                    ? "Enregistrement..."
-                    : editingId
-                      ? "Mettre à jour"
-                      : "Enregistrer"}
-                </Button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button type="submit" disabled={isLoading}>
+                      {isLoading
+                        ? "Enregistrement..."
+                        : editingId
+                          ? "Mettre à jour"
+                          : "Enregistrer"}
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Enregistrement réussi</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Le partenaire a été bien enregistrer
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <DialogClose asChild>
+                            <AlertDialogAction
+                              onClick={()=>{
+                                setFile(null);
+                                setNom("");
+                                setLien("");
+                                setDesc("");
+                                setPreview(null)
+                              }}
+                            >
+                              Continuer
+                            </AlertDialogAction>
+                          </DialogClose>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                  </AlertDialogContent>
+                </AlertDialog>
               </form>
             </DialogContent>
           </Dialog>
@@ -297,13 +335,27 @@ export default function Partenaires() {
                             <Pen className="mr-2 h-4 w-4" />
                             <span>Renommer</span>
                           </DropdownMenuItem>
-                          <DropdownMenuItem
-                            className="text-red-500"
-                            onClick={() => handleDelete(partenaire._id)}
-                          >
-                            <Trash className="mr-2 h-4 w-4" />
-                            <span>Supprimer</span>
-                          </DropdownMenuItem>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <DropdownMenuItem
+                                className="text-red-500"
+                                onSelect={(e) => e.preventDefault()}
+                              >
+                                <Trash className="mr-2 h-4 w-4" />
+                                <span>Supprimer</span>
+                              </DropdownMenuItem>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Suprimer!?</AlertDialogTitle>
+                                  <AlertDialogDescription>Vous êtes sûr de vouloir Supprimer?</AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Annuler</AlertDialogCancel>
+                                  <AlertDialogAction onClick={() => handleDelete(partenaire._id)}>Continuer</AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>

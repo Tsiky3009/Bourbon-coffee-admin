@@ -230,7 +230,7 @@ export default function Edito() {
                           setSelectedFile(null);
                           setFilePreview(null);
                           setError(null);
-                        }}>Continue</AlertDialogAction>
+                        }}>Continuer</AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>
                 </AlertDialog>
@@ -307,12 +307,12 @@ export default function Edito() {
                                   </AlertDialogTrigger>
                                   <AlertDialogContent>
                                     <AlertDialogHeader>
-                                        <AlertDialogTitle>Supprimer !?</AlertDialogTitle>
-                                        <AlertDialogDescription>Vous êtes sûr de vouloir Supprimer</AlertDialogDescription>
+                                        <AlertDialogTitle>Supprimer!?</AlertDialogTitle>
+                                        <AlertDialogDescription>Vous êtes sûr de vouloir Supprimer?</AlertDialogDescription>
                                     </AlertDialogHeader>
                                     <AlertDialogFooter>
-                                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                      <AlertDialogAction onClick={() => handleDelete(file._id)}>Continue</AlertDialogAction>
+                                      <AlertDialogCancel>Annuler</AlertDialogCancel>
+                                      <AlertDialogAction onClick={() => handleDelete(file._id)}>Continuer</AlertDialogAction>
                                     </AlertDialogFooter>
                                   </AlertDialogContent>
                               </AlertDialog>
