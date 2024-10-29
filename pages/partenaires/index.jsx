@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect} from "react";
 import style from "./styles/partenaire.module.css";
 import Image from "next/image";
 import AdminLayout from "@/components/AdminLayout";
@@ -31,6 +31,14 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
+import BarLoader from "react-spinners/BarLoader"
+
+const override = {
+  display: "block",
+  margin:"0 auto",
+  borderColor: "white",
+}
+
 export default function Partenaires() {
   const [nom, setNom] = useState("");
   const [lien, setLien] = useState("");
@@ -41,6 +49,7 @@ export default function Partenaires() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [editingId, setEditingId] = useState(null);
+  const [color, setColor] = useState("#ffffff")
 
   const path = "/uploads/"
 
@@ -239,7 +248,14 @@ export default function Partenaires() {
 
         <div className="w-full mt-4">
           {isLoading ? (
-            <p>Chargement des partenaires...</p>
+            <BarLoader
+              color={color}
+              loading={isLoading}
+              cssOverride={override}
+              size={150}
+              aria-label="Loading Spinner"
+              data-testid="loader"
+            />
           ) : error ? (
             <p>
               Une erreur s'est produite pendant le chargement des partenaires...

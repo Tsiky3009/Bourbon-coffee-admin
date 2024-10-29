@@ -16,7 +16,6 @@ export default async function handler(
         .db()
         .collection("files")
         .findOne({ _id: new ObjectId(currentActiveEdito.editoId) });
-      console.log(edito);
       return res.json({ editoId: currentActiveEdito.editoId, edito });
     } catch (error) {
       return res.status(500).json({ error: "Internal Server Error" });

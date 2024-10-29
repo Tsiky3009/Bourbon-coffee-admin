@@ -27,17 +27,39 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { toast } from "@/hooks/use-toast";
+import BarLoader from "react-spinners/BarLoader"
+
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+
+const override = {
+  display: "block",
+  margin:"0 auto",
+  borderColor: "white",
+}
 
 export default function Edito() {
-  const [filePreview, setFilePreview] = useState(null);
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [fileURL, setFileURL] = useState(null);
-  const [files, setFiles] = useState([]);
-  const [editingFile, setEditingFile] = useState(null);
-  const [fetchError, setFetchError] = useState(false);
-  const [error, setError] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [activeEditoId, setActiveEditoId] = useState(null);
+  const [filePreview, setFilePreview] = useState(null)
+  const [selectedFile, setSelectedFile] = useState(null)
+  const [fileURL, setFileURL] = useState(null)
+  const [files, setFiles] = useState([])
+  const [editingFile, setEditingFile] = useState(null)
+  const [fetchError, setFetchError] = useState(false)
+  const [error, setError] = useState(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const [activeEditoId, setActiveEditoId] = useState(null)
+  const [color, setColor] = useState("#ffffff")
+  const [isSheetOpen, setIsSheetOpen] = useState(false)
+  const [success, setSuccess] = useState(false);
 
   useEffect(() => {
     fetchFiles();
@@ -103,6 +125,8 @@ export default function Edito() {
           body: formData,
         });
         const result = await res.json();
+        setSuccess(true);
+        await fetchFiles()
         // Handle successful upload (e.g., show success message, refresh file list)
       } catch (error) {
         console.error("Error uploading file:", error);
@@ -175,7 +199,7 @@ export default function Edito() {
       <div className="w-full p-4">
         <div className="flex justify-between">
           <h1 className="text-xl font-semibold">Editos</h1>
-          <Sheet>
+          <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
             <SheetTrigger asChild>
               <Button>Uploader un fichier</Button>
             </SheetTrigger>
@@ -189,7 +213,27 @@ export default function Edito() {
               <div className="flex gap-2 my-2">
                 <Input type="file" onChange={handleFileChange} />
                 {selectedFile && filePreview && (
-                  <Button onClick={handleUpload}>Uploader le fichier</Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button onClick={handleUpload}>Uploader le fichier</Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Upload du fichier avec succé</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Le fichier que vous avez importé a bien été uploadé
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogAction onClick={()=>{
+                          setIsSheetOpen(false);
+                          setSelectedFile(null);
+                          setFilePreview(null);
+                          setError(null);
+                        }}>Continue</AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
                 )}
               </div>
               <div className="max-h-40">
@@ -200,7 +244,14 @@ export default function Edito() {
           </Sheet>
         </div>
         {isLoading ? (
-          <p>Chargement des editos...</p>
+            <BarLoader
+              color={color}
+              loading={isLoading}
+              cssOverride={override}
+              size={150}
+              aria-label="Loading Spinner"
+              data-testid="loader"
+            />
         ) : fetchError ? (
           <p>Une erreur s'est produite pendant le chargement des editos...</p>
         ) : (
@@ -244,13 +295,27 @@ export default function Edito() {
                               <Pen className="mr-2 h-4 w-4" />
                               <span>Renommer</span>
                             </DropdownMenuItem>
-                            <DropdownMenuItem
-                              className="text-red-500"
-                              onClick={() => handleDelete(file._id)}
-                            >
-                              <Trash className="mr-2 h-4 w-4" />
-                              <span>Supprimer</span>
-                            </DropdownMenuItem>
+                              <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                    <DropdownMenuItem 
+                                      className="text-red-500"
+                                      onSelect={(e) => e.preventDefault()}
+                                      >
+                                      <Trash className="mr-2 h-4 w-4" />
+                                      <span>Supprimer</span>
+                                    </DropdownMenuItem>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                        <AlertDialogTitle>Supprimer !?</AlertDialogTitle>
+                                        <AlertDialogDescription>Vous êtes sûr de vouloir Supprimer</AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                      <AlertDialogAction onClick={() => handleDelete(file._id)}>Continue</AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                              </AlertDialog>
                             <DropdownMenuItem
                               className="text-red-500"
                               onClick={() => activateEdito(file._id)}
