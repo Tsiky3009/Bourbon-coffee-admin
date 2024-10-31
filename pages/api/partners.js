@@ -87,6 +87,19 @@ export default async function handler(req, res) {
       try {
         const { id } = req.query;
         const result = await deletePartner(id);
+
+        const partner = await collection.findOne({ _id: new ObjectId(id) });
+
+        const fileExists =
+          (await fsPromises.readdir(UPLOAD_DIR)).filter(
+            (f) => f === partner.fileName,
+          ).length === 1;
+
+        if (fileExists) {
+          // delete the associated file
+          await fsPromises.unlink(path.join(UPLOAD_DIR, partner.fileName));
+        }
+
         if (result.deletedCount === 1) {
           return res
             .status(200)
