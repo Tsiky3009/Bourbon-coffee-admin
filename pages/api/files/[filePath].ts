@@ -14,7 +14,7 @@ export default async function serveFile(
     const stats = await fsPromises.stat(fp);
     res.writeHead(200, {
       // "Content-Disposition": `attachment; filename=${path.basename(filePath as string)}`,
-      "Content-Type": "application/pdf", // application/msword
+      // "Content-Type": "application/pdf", // application/msword
       "Content-Length": stats.size,
     });
     await new Promise(function (resolve) {

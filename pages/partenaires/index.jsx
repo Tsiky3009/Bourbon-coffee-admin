@@ -103,8 +103,8 @@ export default function Partenaires() {
     setError(null);
 
     const formData = new FormData();
-    formData.append("nom", nom);
-    formData.append("lien", lien);
+    formData.append("name", nom);
+    formData.append("link", lien);
     formData.append("description", desc);
     if (file) {
       formData.append("fileupload", file);
@@ -302,6 +302,7 @@ export default function Partenaires() {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead>Logo</TableHead>
                   <TableHead>Nom</TableHead>
                   <TableHead>Lien</TableHead>
                   <TableHead>Description</TableHead>
@@ -312,8 +313,17 @@ export default function Partenaires() {
               <TableBody>
                 {partenaires.map((partenaire, index) => (
                   <TableRow key={partenaire._id || index}>
-                    <TableCell>{partenaire.nom}</TableCell>
-                    <TableCell>{partenaire.lien}</TableCell>
+                    <TableCell>
+                      <Image
+                        src={`/file_uploads/${partenaire.fileName}`}
+                        style={{ objectFit: "contain" }}
+                        alt={`lodo de ${partenaire.name}`}
+                        height={64}
+                        width={128}
+                      />
+                    </TableCell>
+                    <TableCell>{partenaire.name}</TableCell>
+                    <TableCell>{partenaire.link}</TableCell>
                     <TableCell>{partenaire.description}</TableCell>
                     {/*<TableCell>
                       <Image
@@ -333,7 +343,7 @@ export default function Partenaires() {
                             onClick={() => handleEdit(partenaire)}
                           >
                             <Pen className="mr-2 h-4 w-4" />
-                            <span>Renommer</span>
+                            <span>Editer</span>
                           </DropdownMenuItem>
                           <AlertDialog>
                             <AlertDialogTrigger asChild>

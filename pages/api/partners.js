@@ -41,14 +41,17 @@ export default async function handler(req, res) {
           return res.status(500).json({ error: "Error parsing the form" });
         }
 
-        const { nom, lien, description } = fields;
-        const file = files.fileupload;
+        if (!fields["name"] || !fields["link"] || !fields["description"]) {
+          return res.json({ error: "Incomplete body" });
+        }
+
+        const file = files ? files.fileupload[0] : null;
 
         try {
           let partnerData = {
-            nom,
-            lien,
-            description,
+            name: fields["name"][0],
+            link: fields["link"][0],
+            description: fields["description"][0],
           };
 
           if (file) {
@@ -84,6 +87,19 @@ export default async function handler(req, res) {
       try {
         const { id } = req.query;
         const result = await deletePartner(id);
+
+        const partner = await collection.findOne({ _id: new ObjectId(id) });
+
+        const fileExists =
+          (await fsPromises.readdir(UPLOAD_DIR)).filter(
+            (f) => f === partner.fileName,
+          ).length === 1;
+
+        if (fileExists) {
+          // delete the associated file
+          await fsPromises.unlink(path.join(UPLOAD_DIR, partner.fileName));
+        }
+
         if (result.deletedCount === 1) {
           return res
             .status(200)
@@ -107,7 +123,7 @@ function buildForm() {
     keepExtensions: true,
   });
 
-  const uploadDir = path.join(process.cwd(), "/public/uploads");
+  const uploadDir = path.join(process.cwd(), "/public/file_uploads");
 
   if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
