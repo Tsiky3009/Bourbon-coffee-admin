@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, forwardRef } from "react";
 import style from "./styles/partenaire.module.css";
 import Image from "next/image";
 import AdminLayout from "@/components/AdminLayout";
@@ -245,6 +245,7 @@ export default function Partenaires() {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead>Logo</TableHead>
                   <TableHead>Nom</TableHead>
                   <TableHead>Lien</TableHead>
                   <TableHead>Description</TableHead>
@@ -254,6 +255,15 @@ export default function Partenaires() {
               <TableBody>
                 {partenaires.map((partenaire, index) => (
                   <TableRow key={partenaire._id || index}>
+                    <TableCell>
+                      <Image
+                        src={`/file_uploads/${partenaire.fileName}`}
+                        style={{ objectFit: "contain" }}
+                        alt={`lodo de ${partenaire.name}`}
+                        height={64}
+                        width={128}
+                      />
+                    </TableCell>
                     <TableCell>{partenaire.name}</TableCell>
                     <TableCell>{partenaire.link}</TableCell>
                     <TableCell>{partenaire.description}</TableCell>
@@ -267,7 +277,7 @@ export default function Partenaires() {
                             onClick={() => handleEdit(partenaire)}
                           >
                             <Pen className="mr-2 h-4 w-4" />
-                            <span>Renommer</span>
+                            <span>Editer</span>
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             className="text-red-500"
