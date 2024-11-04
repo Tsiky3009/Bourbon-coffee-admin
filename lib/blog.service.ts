@@ -1,5 +1,6 @@
 import client from "@/lib/mongodb";
 import { Document, InsertOneResult, WithId } from "mongodb";
+import slug from "slug";
 
 export type Blog = {
   id?: any;
@@ -34,7 +35,7 @@ export async function getBlog() {
 export async function createBlog(blog: Blog) {
   try {
     const blogCollection = client.db().collection("blogs");
-    await blogCollection.insertOne(blog);
+    await blogCollection.insertOne({ ...blog, slug: slug(blog.title) });
     return { data: blog };
   } catch (err) {
     return { error: "Database connection error" };
