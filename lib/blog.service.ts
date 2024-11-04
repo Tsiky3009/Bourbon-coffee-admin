@@ -1,5 +1,5 @@
 import client from "@/lib/mongodb";
-import { Document, InsertOneResult, WithId } from "mongodb";
+import { Document, WithId } from "mongodb";
 import slug from "slug";
 
 export type Blog = {
