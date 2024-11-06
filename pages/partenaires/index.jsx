@@ -127,12 +127,12 @@ export default function Partenaires() {
       console.log("Form submitted successfully:", result);
 
       // Clear form fields
-      setNom("");
+      /*setNom("");
       setLien("");
       setDesc("");
       setFile(null);
       setPreview(null);
-      setEditingId(null);
+      setEditingId(null);*/
 
       // Refresh the list of partenaires
       await fetchPartenaires();
@@ -318,8 +318,8 @@ export default function Partenaires() {
                         src={`/file_uploads/${partenaire.fileName}`}
                         style={{ objectFit: "contain" }}
                         alt={`lodo de ${partenaire.name}`}
-                        height={64}
-                        width={128}
+                        height={80}
+                        width={80}
                       />
                     </TableCell>
                     <TableCell>{partenaire.name}</TableCell>
