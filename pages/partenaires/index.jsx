@@ -1,5 +1,4 @@
-import { useState, useEffect} from "react";
-import style from "./styles/partenaire.module.css";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import AdminLayout from "@/components/AdminLayout";
 import { Input } from "@/components/ui/input";
@@ -26,7 +25,6 @@ import {
   DialogClose,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -41,15 +39,15 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
+} from "@/components/ui/alert-dialog";
 
-import BarLoader from "react-spinners/BarLoader"
+import BarLoader from "react-spinners/BarLoader";
 
 const override = {
   display: "block",
-  margin:"0 auto",
+  margin: "0 auto",
   borderColor: "white",
-}
+};
 
 export default function Partenaires() {
   const [nom, setNom] = useState("");
@@ -61,9 +59,6 @@ export default function Partenaires() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [editingId, setEditingId] = useState(null);
-  const [color, setColor] = useState("#ffffff")
-
-  const path = "/uploads/"
 
   const fetchPartenaires = async () => {
     setIsLoading(true);
@@ -73,7 +68,7 @@ export default function Partenaires() {
         throw new Error("Failed to fetch partenaires");
       }
       const data = await response.json();
-      console.log(data)
+      console.log(data);
       setPartenaires(data);
     } catch (err) {
       setError(err.message);
@@ -162,8 +157,8 @@ export default function Partenaires() {
 
   const handleEdit = (partenaire) => {
     setEditingId(partenaire._id);
-    setNom(partenaire.nom);
-    setLien(partenaire.lien);
+    setNom(partenaire.name);
+    setLien(partenaire.link);
     setDesc(partenaire.description);
     setPreview(null); // Reset preview as we don't have the image URL
   };
@@ -254,29 +249,31 @@ export default function Partenaires() {
                     </Button>
                   </AlertDialogTrigger>
                   <AlertDialogContent>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Enregistrement réussi</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Le partenaire a été bien enregistrer
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <DialogClose asChild>
-                            <AlertDialogAction
-                              onClick={()=>{
-                                setFile(null);
-                                setNom("");
-                                setLien("");
-                                setDesc("");
-                                setPreview(null)
-                              }}
-                            >
-                              Continuer
-                            </AlertDialogAction>
-                          </DialogClose>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>
+                          Enregistrement réussi
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Le partenaire a été bien enregistrer
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <DialogClose asChild>
+                          <AlertDialogAction
+                            onClick={() => {
+                              setFile(null);
+                              setNom("");
+                              setLien("");
+                              setDesc("");
+                              setPreview(null);
+                            }}
+                          >
+                            Continuer
+                          </AlertDialogAction>
+                        </DialogClose>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
                   </AlertDialogContent>
                 </AlertDialog>
               </form>
@@ -287,7 +284,7 @@ export default function Partenaires() {
         <div className="w-full mt-4">
           {isLoading ? (
             <BarLoader
-              color={color}
+              color={"#fff"}
               loading={isLoading}
               cssOverride={override}
               size={150}
@@ -325,49 +322,166 @@ export default function Partenaires() {
                     <TableCell>{partenaire.name}</TableCell>
                     <TableCell>{partenaire.link}</TableCell>
                     <TableCell>{partenaire.description}</TableCell>
-                    {/*<TableCell>
-                      <Image
-                        src={`${path}${partenaire.fileName}`}
-                        alt="logo partenaire"
-                        width={100}
-                        height={100}
-                      />
-                    </TableCell>*/}
                     <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger>
-                          <MoreHorizontal />
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent className="w-56">
-                          <DropdownMenuItem
-                            onClick={() => handleEdit(partenaire)}
-                          >
-                            <Pen className="mr-2 h-4 w-4" />
-                            <span>Editer</span>
-                          </DropdownMenuItem>
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <DropdownMenuItem
-                                className="text-red-500"
-                                onSelect={(e) => e.preventDefault()}
-                              >
-                                <Trash className="mr-2 h-4 w-4" />
-                                <span>Supprimer</span>
-                              </DropdownMenuItem>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
+                      <Dialog>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger>
+                            <MoreHorizontal />
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent className="w-56">
+                            <DropdownMenuItem
+                              onClick={() => handleEdit(partenaire)}
+                            >
+                              <DialogTrigger>
+                                <div className="flex w-full items-center">
+                                  <Pen className="mr-2 h-4 w-4" />
+                                  <span>Editer</span>
+                                </div>
+                              </DialogTrigger>
+                            </DropdownMenuItem>
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <DropdownMenuItem
+                                  className="text-red-500"
+                                  onSelect={(e) => e.preventDefault()}
+                                >
+                                  <Trash className="mr-2 h-4 w-4" />
+                                  <span>Supprimer</span>
+                                </DropdownMenuItem>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
                                 <AlertDialogHeader>
-                                  <AlertDialogTitle>Suprimer!?</AlertDialogTitle>
-                                  <AlertDialogDescription>Vous êtes sûr de vouloir Supprimer?</AlertDialogDescription>
+                                  <AlertDialogTitle>
+                                    Suprimer!?
+                                  </AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Vous êtes sûr de vouloir Supprimer?
+                                  </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
                                   <AlertDialogCancel>Annuler</AlertDialogCancel>
-                                  <AlertDialogAction onClick={() => handleDelete(partenaire._id)}>Continuer</AlertDialogAction>
+                                  <AlertDialogAction
+                                    onClick={() => handleDelete(partenaire._id)}
+                                  >
+                                    Continuer
+                                  </AlertDialogAction>
                                 </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                        <DialogContent className="sm:max-w-[425px] max-h-[80vh] overflow-y-auto">
+                          <DialogHeader>
+                            <DialogTitle>
+                              Modifier les informations sur le partenaire
+                            </DialogTitle>
+                          </DialogHeader>
+
+                          <form
+                            onSubmit={handleSubmit}
+                            encType="multipart/form-data"
+                            className="flex flex-col gap-4"
+                          >
+                            <div className="flex flex-col gap-2">
+                              <Label>Logo</Label>
+                              <div className="flex items-center gap-2">
+                                {preview ? (
+                                  <Image
+                                    src={preview}
+                                    alt="logo preview"
+                                    width={256}
+                                    height={120}
+                                  />
+                                ) : (
+                                  <Image
+                                    src={`/file_uploads/${partenaire.fileName}`}
+                                    alt={`logo of ${partenaire.name}`}
+                                    width={256}
+                                    height={120}
+                                    className="bg-gray-200"
+                                  />
+                                )}
+                                <Button asChild variant="outline">
+                                  <Label htmlFor="change">
+                                    Changer
+                                    <Input
+                                      type="file"
+                                      name="fileUpload"
+                                      id="change"
+                                      onChange={handleFileChange}
+                                      className="hidden"
+                                    />
+                                  </Label>
+                                </Button>
+                              </div>
+                            </div>
+
+                            <div className="flex flex-col gap-2">
+                              <Label htmlFor="id_nom">Nom</Label>
+                              <Input
+                                type="text"
+                                id="id_nom"
+                                value={nom}
+                                onChange={(e) => setNom(e.target.value)}
+                              />
+                            </div>
+
+                            <div className="flex flex-col gap-2">
+                              <Label htmlFor="id_lien">Lien</Label>
+                              <Input
+                                type="text"
+                                id="id_lien"
+                                value={lien}
+                                onChange={(e) => setLien(e.target.value)}
+                              />
+                            </div>
+
+                            <div className="flex flex-col gap-2">
+                              <Label htmlFor="id_desc">Descriptions</Label>
+                              <Textarea
+                                name="input_desc"
+                                id="id_desc"
+                                value={desc}
+                                onChange={(e) => setDesc(e.target.value)}
+                              ></Textarea>
+                            </div>
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button type="submit" disabled={isLoading}>
+                                  Enregistrer
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>
+                                      Enregistrement réussi
+                                    </AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      Le partenaire a été bien enregistrer
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <DialogClose asChild>
+                                      <AlertDialogAction
+                                        onClick={() => {
+                                          setFile(null);
+                                          setNom("");
+                                          setLien("");
+                                          setDesc("");
+                                          setPreview(null);
+                                        }}
+                                      >
+                                        Continuer
+                                      </AlertDialogAction>
+                                    </DialogClose>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </form>
+                        </DialogContent>
+                      </Dialog>
                     </TableCell>
                   </TableRow>
                 ))}
