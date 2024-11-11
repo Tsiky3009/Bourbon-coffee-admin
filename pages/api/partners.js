@@ -32,8 +32,7 @@ export default async function handler(req, res) {
       }
     }
 
-    case "POST":
-    case "PUT": {
+    case "POST": {
       const form = buildForm();
 
       form.parse(req, async (err, fields, files) => {
@@ -45,7 +44,7 @@ export default async function handler(req, res) {
           return res.json({ error: "Incomplete body" });
         }
 
-        const file = files ? files.fileupload[0] : null;
+        const file = files && files.fileupload ? files.fileupload[0] : null;
 
         try {
           let partnerData = {
@@ -58,18 +57,6 @@ export default async function handler(req, res) {
             partnerData.fileName = file.newFilename;
           }
 
-          if (req.method === "PUT") {
-            const { id } = req.query;
-            const result = await collection.updateOne(
-              { _id: new ObjectId(id) },
-              { $set: partnerData },
-            );
-            return res
-              .status(200)
-              .json({ message: "Partenaire updated successfully", result });
-          }
-
-          // IF POST
           partnerData.uploadDate = new Date();
           const result = await createPartner(partnerData);
           return res.status(200).json({
@@ -81,6 +68,48 @@ export default async function handler(req, res) {
           return res.status(500).json({ error: "Error saving to database" });
         }
       });
+      break;
+    }
+
+    case "PUT": {
+      const form = buildForm();
+
+      form.parse(req, async (err, fields, files) => {
+        if (err) {
+          return res.status(500).json({ error: "Error parsing the form" });
+        }
+
+        if (!fields["name"] || !fields["link"] || !fields["description"]) {
+          return res.json({ error: "Incomplete body" });
+        }
+
+        const file = files && files.fileupload ? files.fileupload[0] : null;
+
+        try {
+          let partnerData = {
+            name: fields["name"][0],
+            link: fields["link"][0],
+            description: fields["description"][0],
+          };
+
+          if (file) {
+            partnerData.fileName = file.newFilename;
+          }
+
+          const { id } = req.query;
+          const result = await collection.updateOne(
+            { _id: new ObjectId(id) },
+            { $set: partnerData },
+          );
+          return res
+            .status(200)
+            .json({ message: "Partenaire updated successfully", result });
+        } catch (error) {
+          console.error("Error saving to MongoDB:", error);
+          return res.status(500).json({ error: "Error saving to database" });
+        }
+      });
+      break;
     }
 
     case "DELETE": {

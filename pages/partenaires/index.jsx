@@ -68,7 +68,6 @@ export default function Partenaires() {
         throw new Error("Failed to fetch partenaires");
       }
       const data = await response.json();
-      console.log(data);
       setPartenaires(data);
     } catch (err) {
       setError(err.message);
@@ -119,7 +118,6 @@ export default function Partenaires() {
       }
 
       const result = await response.json();
-      console.log("Form submitted successfully:", result);
 
       // Clear form fields
       setNom("");
