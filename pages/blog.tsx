@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import {
   Card,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -56,6 +57,25 @@ export default function BlogPage() {
       return;
     }
   }
+
+  async function handleDeleteEdito(_id: any) {
+    try {
+      const res = await fetch(`/api/blog/${_id}`, { method: "DELETE" });
+      const result = await res.json();
+      if (result.error) {
+        toast({ title: "An error occured", variant: "destructive" });
+        return;
+      }
+      if (result.data) {
+        toast({ title: "Blog deleted susccefully" });
+      }
+    } catch (err) {
+      console.error("Error while deleting blog");
+    } finally {
+      fetchBlog();
+    }
+  }
+
   return (
     <AdminLayout>
       <div className="w-full h-screen p-4">
@@ -80,6 +100,11 @@ export default function BlogPage() {
                       {blog.exerpt ? blog.exerpt : "Description non disponible"}
                     </CardDescription>
                   </CardHeader>
+                  <CardFooter>
+                    <Button onClick={() => handleDeleteEdito(blog.id)}>
+                      Delete
+                    </Button>
+                  </CardFooter>
                 </Card>
               </li>
             ))}

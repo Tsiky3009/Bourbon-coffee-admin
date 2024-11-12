@@ -13,6 +13,7 @@ export default async function handler(req: any, res: NextApiResponse) {
       const data = await getBlog();
       return res.json(data);
     }
+
     case "POST": {
       try {
         const parsed = schema.parse(req.body);
