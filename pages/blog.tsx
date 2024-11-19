@@ -11,6 +11,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 
 export default function BlogPage() {
   const { toast } = useToast();
@@ -76,6 +78,28 @@ export default function BlogPage() {
     }
   }
 
+  async function showBlogOnNavbar(blog: any) {
+    console.log(blog);
+    try {
+      const res = await fetch(`/api/blog/${blog.id}`, {
+        method: "PUT",
+        body: JSON.stringify({ ...blog, showOnNavbar: !blog.showOnNavbar }),
+      });
+      const result = await res.json();
+      if (result.error) {
+        toast({ title: "An error occured", variant: "destructive" });
+        return;
+      }
+      if (result.data) {
+        toast({ title: "Blog updated susccefully" });
+      }
+    } catch (err) {
+      alert("Error while updating blog");
+    } finally {
+      fetchBlog();
+    }
+  }
+
   return (
     <AdminLayout>
       <div className="w-full h-screen p-4">
@@ -104,6 +128,14 @@ export default function BlogPage() {
                     <Button onClick={() => handleDeleteEdito(blog.id)}>
                       Delete
                     </Button>
+                    <div>
+                      <Label>Afficher sur l'entête</Label>
+                      <Input
+                        type="checkbox"
+                        checked={blog.showOnNavbar || false}
+                        onChange={() => showBlogOnNavbar(blog)}
+                      />
+                    </div>
                   </CardFooter>
                 </Card>
               </li>
