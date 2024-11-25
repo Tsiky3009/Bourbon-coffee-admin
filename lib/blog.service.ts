@@ -7,6 +7,7 @@ export type Blog = {
   title: string;
   exerpt?: string;
   content: string;
+  showOnNavbar: boolean;
 };
 
 function blogBuilder(data: WithId<Document>): Blog {
@@ -14,6 +15,7 @@ function blogBuilder(data: WithId<Document>): Blog {
     id: data._id.toString(),
     title: data.title,
     content: data.content,
+    showOnNavbar: data.showOnNavbar,
   };
 }
 
