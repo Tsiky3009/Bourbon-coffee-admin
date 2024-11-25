@@ -128,7 +128,6 @@ export default function Partenaires() {
       setFile(null);
       setPreview(null);
       setEditingId(null);*/
-
       // Refresh the list of partenaires
       await fetchPartenaires();
     } catch (err) {
@@ -303,7 +302,6 @@ export default function Partenaires() {
                   <TableHead>Nom</TableHead>
                   <TableHead>Lien</TableHead>
                   <TableHead>Description</TableHead>
-                  {/*<TableHead>Logo</TableHead>*/}
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -314,7 +312,7 @@ export default function Partenaires() {
                       <Image
                         src={`/file_uploads/${partenaire.fileName}`}
                         style={{ objectFit: "contain" }}
-                        alt={`lodo de ${partenaire.name}`}
+                        alt={`logo de ${partenaire.name}`}
                         height={80}
                         width={80}
                       />
@@ -389,15 +387,15 @@ export default function Partenaires() {
                                   <Image
                                     src={preview}
                                     alt="logo preview"
-                                    width={256}
-                                    height={120}
+                                    width={80}
+                                    height={80}
                                   />
                                 ) : (
                                   <Image
                                     src={`/file_uploads/${partenaire.fileName}`}
                                     alt={`logo of ${partenaire.name}`}
-                                    width={256}
-                                    height={120}
+                                    width={80}
+                                    height={80}
                                     className="bg-gray-200"
                                   />
                                 )}
