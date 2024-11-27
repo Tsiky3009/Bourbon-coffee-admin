@@ -24,3 +24,12 @@
     width: 100%;
     justify-content: space-around;
 }
+
+
+@media(max-width: 1013px){
+    .card_list{
+        display: flex;
+        flex-direction: column;
+        height: 80vh;
+    }
+}

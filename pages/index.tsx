@@ -73,6 +73,7 @@ export default function Home() {
   return (
     <AdminLayout>
       <div className="p-4 w-full">
+        <div className={style.header}></div>
         <h1 className="text-xl font-semibold">Bourbon Coffee Administration</h1>
         <div className={style.card_list}>
             <Card>

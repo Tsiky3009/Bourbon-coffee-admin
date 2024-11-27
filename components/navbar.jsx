@@ -1,47 +1,96 @@
-// import style from "./styles/navbar.module.css";
-import Link from "next/link";
+import { useState } from 'react';
 import { Button } from "@/components/ui/button";
+import { Menu, X } from 'lucide-react';
 
 export default function Navbar() {
+  const [isOpen, setIsOpen] = useState(false);
+  const [isCliqued, setIsCliqued] = useState(false)
+
   return (
-    <aside className="bg-[#18181b] text-white min-w-56 w-56 max-w-56 min-h-screen transition-all duration-300 ease-in-out">
-      <div className="p-4">
-        <h1 className="text-2xl font-semibold">Bourbon Coffee</h1>
-      </div>
-      <nav className="mt-4">
-        <Link href={"/"}>
-          <Button
-            variant="ghost"
-            className="w-full justify-start text-white hover:bg-gray-700 hover:text-white"
+    <>
+      {/* Mobile Toggle Button - Fixed to left with full height */}
+      <button 
+        className={isCliqued ? `bt-none`:`md:hidden top-0 bottom-0 left-0 z-50 bg-[#18181b] flex items-start justify-center w-12`}
+        onClick={
+          () => {
+            setIsOpen(!isOpen);
+            setIsCliqued(!isCliqued)
+          }
+        }
+      >
+        {isOpen ? <div className="w-12 my-5"></div> : <Menu className="text-white my-5" />}
+      </button>
+
+      {/* Sidebar */}
+      <aside 
+        className={`
+          fixed top-0 left-0 z-40 bg-[#18181b] text-white 
+          w-56 min-h-screen 
+          transform transition-transform duration-300 ease-in-out
+          ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+          md:translate-x-0 md:relative
+        `}
+      >
+        <div className="p-4 flex items-center justify-between">
+          <h1 className="text-2xl font-semibold">Bourbon Coffee</h1>
+          {/* Close button for mobile */}
+          <button 
+            className="md:hidden"
+            onClick={() => {
+              setIsOpen(false);
+              setIsCliqued(false)
+            }}
           >
-            Dashboard
-          </Button>
-        </Link>
-        <Link href={"/edito"}>
-          <Button
-            variant="ghost"
-            className="w-full justify-start text-white hover:bg-gray-700 hover:text-white"
+            <X className="text-white" />
+          </button>
+        </div>
+        <nav className="mt-4">
+          <a href="/" 
+            className="block w-full"
+            onClick={() => setIsOpen(false)}
           >
-            Editos
-          </Button>
-        </Link>
-        <Link href="/partenaires">
-          <Button
-            variant="ghost"
-            className="w-full justify-start text-white hover:bg-gray-700 hover:text-white"
+            <Button
+              variant="ghost"
+              className="w-full justify-start text-white hover:bg-gray-700 hover:text-white"
+            >
+              Dashboard
+            </Button>
+          </a>
+          <a href="/edito" 
+            className="block w-full"
+            onClick={() => setIsOpen(false)}
           >
-            Partenaires
-          </Button>
-        </Link>
-        <Link href="/blog">
-          <Button
-            variant="ghost"
-            className="w-full justify-start text-white hover:bg-gray-700 hover:text-white"
+            <Button
+              variant="ghost"
+              className="w-full justify-start text-white hover:bg-gray-700 hover:text-white"
+            >
+              Editos
+            </Button>
+          </a>
+          <a href="/partenaires" 
+            className="block w-full"
+            onClick={() => setIsOpen(false)}
           >
-            Articles
-          </Button>
-        </Link>
-      </nav>
-    </aside>
+            <Button
+              variant="ghost"
+              className="w-full justify-start text-white hover:bg-gray-700 hover:text-white"
+            >
+              Partenaires
+            </Button>
+          </a>
+          <a href="/blog" 
+            className="block w-full"
+            onClick={() => setIsOpen(false)}
+          >
+            <Button
+              variant="ghost"
+              className="w-full justify-start text-white hover:bg-gray-700 hover:text-white"
+            >
+              Articles
+            </Button>
+          </a>
+        </nav>
+      </aside>
+    </>
   );
 }
