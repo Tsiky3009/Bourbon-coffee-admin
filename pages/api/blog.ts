@@ -1,10 +1,12 @@
 import { createBlog, getBlog } from "@/lib/blog.service";
+import { ShoppingBag } from "lucide-react";
 import { NextApiRequest, NextApiResponse } from "next";
 import { z } from "zod";
 
 const schema = z.object({
   title: z.string(),
   content: z.string(),
+  showOnNavbar: z.boolean(),
 });
 
 export default async function handler(req: any, res: NextApiResponse) {

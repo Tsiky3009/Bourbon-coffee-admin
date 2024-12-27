@@ -13,6 +13,7 @@ export default function NewPostForm({ handleResponse }: Props) {
   const [blog, setBlog] = useState<Blog>({
     title: "Titre du blog",
     content: "",
+    showOnNavbar: false,
   });
 
   async function createPost(e: FormEvent<HTMLFormElement>) {
