@@ -77,6 +77,7 @@ export default function Edito() {
       }
 
       setFiles(result.data);
+      console.log(result.data);
     } catch (error) {
       setFetchError(true);
     } finally {
@@ -160,7 +161,7 @@ export default function Edito() {
 
   const handleDelete = async (id) => {
     try {
-      await fetch(`/api/edito?id=${id}`, {
+      await fetch(`/api/edito/${id}`, {
         method: "DELETE",
       });
       fetchFiles(); // Refresh the file list
@@ -170,20 +171,20 @@ export default function Edito() {
   };
 
   const handleEdit = (file) => {
+    console.log(file);
     setEditingFile(file);
   };
 
   const handleSaveEdit = async () => {
     if (editingFile) {
       try {
-        await fetch("/api/edito", {
-          method: "PUT",
+        await fetch(`/api/edito/${editingFile._id}`, {
+          method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            id: editingFile._id,
-            newFileName: editingFile.fileName,
+            newFileName: editingFile.filename,
           }),
         });
         setEditingFile(null);
@@ -278,16 +279,16 @@ export default function Edito() {
                     >
                       {editingFile && editingFile._id === file._id ? (
                         <Input
-                          value={editingFile.fileName}
+                          value={editingFile.filename}
                           onChange={(e) =>
                             setEditingFile({
                               ...editingFile,
-                              fileName: e.target.value,
+                              filename: e.target.value,
                             })
                           }
                         />
                       ) : (
-                        file.fileName
+                        file.filename
                       )}
                     </TableCell>
                     <TableCell>
