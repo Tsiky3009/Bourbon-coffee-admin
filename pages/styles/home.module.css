@@ -1,0 +1,35 @@
+.body {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: max-content;
+}
+
+.column_1{
+    width: 20%;
+    height: 40.27em;
+}
+
+.column_2{
+    width: 90%;
+    background-color: brown;
+    display: flex;
+    flex-direction: row;
+}
+
+
+.card_list{
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    justify-content: space-around;
+}
+
+
+@media(max-width: 1013px){
+    .card_list{
+        display: flex;
+        flex-direction: column;
+        height: 80vh;
+    }
+}
