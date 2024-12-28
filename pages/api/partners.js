@@ -16,8 +16,8 @@ export const config = {
 };
 
 export default async function handler(req, res) {
-  const db = client.db("bourbon");
-  const collection = db.collection("partenaires");
+  // const db = client.db("bourbon");
+  // const collection = db.collection("partenaires");
 
   switch (req.method) {
     case "GET": {
@@ -33,42 +33,35 @@ export default async function handler(req, res) {
     }
 
     case "POST": {
-      const form = buildForm();
+      const form = formidable();
+      try {
+        const [fields, files] = await form.parse(req);
 
-      form.parse(req, async (err, fields, files) => {
-        if (err) {
-          return res.status(500).json({ error: "Error parsing the form" });
+        const metadataIsComplete =
+          fields["name"] &&
+          fields["website"] &&
+          fields["description"] &&
+          fields["name"][0] &&
+          fields["website"][0] &&
+          fields["description"][0];
+        const logo = files && files.logo ? files.logo[0] : null;
+
+        if (!(metadataIsComplete && logo)) {
+          return res.status(400).json({ message: "Incomplete body" });
         }
 
-        if (!fields["name"] || !fields["link"] || !fields["description"]) {
-          return res.json({ error: "Incomplete body" });
-        }
+        await createPartner(logo, {
+          name: fields["name"][0],
+          description: fields["description"][0],
+          website: fields["website"][0],
+        });
 
-        const file = files && files.fileupload ? files.fileupload[0] : null;
-
-        try {
-          let partnerData = {
-            name: fields["name"][0],
-            link: fields["link"][0],
-            description: fields["description"][0],
-          };
-
-          if (file) {
-            partnerData.fileName = file.newFilename;
-          }
-
-          partnerData.uploadDate = new Date();
-          const result = await createPartner(partnerData);
-          return res.status(200).json({
-            message: "Partenaire added successfully",
-            insertedId: result.insertedId,
-          });
-        } catch (error) {
-          console.error("Error saving to MongoDB:", error);
-          return res.status(500).json({ error: "Error saving to database" });
-        }
-      });
-      break;
+        return res
+          .status(200)
+          .json({ message: "Partener created successfully" });
+      } catch (error) {
+        return res.status(400).json({ message: "Failed to parse form" });
+      }
     }
 
     case "PUT": {

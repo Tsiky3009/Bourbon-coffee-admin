@@ -68,6 +68,7 @@ export default function Partenaires() {
         throw new Error("Failed to fetch partenaires");
       }
       const data = await response.json();
+      console.log(data);
       setPartenaires(data);
     } catch (err) {
       setError(err.message);
@@ -98,14 +99,14 @@ export default function Partenaires() {
 
     const formData = new FormData();
     formData.append("name", nom);
-    formData.append("link", lien);
+    formData.append("website", lien);
     formData.append("description", desc);
     if (file) {
-      formData.append("fileupload", file);
+      formData.append("logo", file);
     }
 
     try {
-      const url = editingId ? `/api/partners?id=${editingId}` : "/api/partners";
+      const url = editingId ? `/api/partners/${editingId}` : "/api/partners";
       const method = editingId ? "PUT" : "POST";
 
       const response = await fetch(url, {
@@ -117,16 +118,6 @@ export default function Partenaires() {
         throw new Error("Failed to submit the form");
       }
 
-      const result = await response.json();
-
-      // Clear form fields
-      /*setNom("");
-      setLien("");
-      setDesc("");
-      setFile(null);
-      setPreview(null);
-      setEditingId(null);*/
-      // Refresh the list of partenaires
       await fetchPartenaires();
     } catch (err) {
       setError(err.message);
@@ -154,15 +145,19 @@ export default function Partenaires() {
 
   const handleEdit = (partenaire) => {
     setEditingId(partenaire._id);
-    setNom(partenaire.name);
-    setLien(partenaire.link);
-    setDesc(partenaire.description);
-    setPreview(null); // Reset preview as we don't have the image URL
+    setNom(partenaire.metadata.name);
+    setLien(partenaire.metadata.website);
+    setDesc(partenaire.metadata.description);
+    setPreview(getImage(partenaire._id));
   };
 
   useEffect(() => {
     fetchPartenaires();
   }, []);
+
+  function getImage(id) {
+    return `http://localhost:3000/api/partners/${id}`;
+  }
 
   return (
     <AdminLayout>
@@ -187,11 +182,11 @@ export default function Partenaires() {
                 className="flex flex-col gap-4"
               >
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="fileupload">Logo</Label>
+                  <Label htmlFor="logo">Logo</Label>
                   <Input
                     type="file"
-                    name="fileupload"
-                    id="fileupload"
+                    name="logo"
+                    id="logo"
                     onChange={handleFileChange}
                   />
                   {preview && (
@@ -217,7 +212,7 @@ export default function Partenaires() {
                 </div>
 
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="id_lien">Lien</Label>
+                  <Label htmlFor="id_lien">Site Web</Label>
                   <Input
                     type="text"
                     id="id_lien"
@@ -227,7 +222,7 @@ export default function Partenaires() {
                 </div>
 
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="id_desc">Descriptions</Label>
+                  <Label htmlFor="id_desc">Description</Label>
                   <Textarea
                     name="input_desc"
                     id="id_desc"
@@ -308,16 +303,18 @@ export default function Partenaires() {
                   <TableRow key={partenaire._id || index}>
                     <TableCell>
                       <Image
-                        src={`/file_uploads/${partenaire.fileName}`}
+                        src={`${getImage(partenaire._id)}`}
                         style={{ objectFit: "contain" }}
-                        alt={`logo de ${partenaire.name}`}
-                        height={80}
-                        width={80}
+                        alt={`logo de ${partenaire.metadata.name}`}
+                        height={128}
+                        width={128}
                       />
                     </TableCell>
-                    <TableCell>{partenaire.name}</TableCell>
-                    <TableCell>{partenaire.link}</TableCell>
-                    <TableCell>{partenaire.description}</TableCell>
+                    <TableCell>{partenaire.metadata.name}</TableCell>
+                    <TableCell>{partenaire.metadata.website}</TableCell>
+                    <TableCell style={{ maxWidth: 300 }}>
+                      {partenaire.metadata.description}
+                    </TableCell>
                     <TableCell>
                       <Dialog>
                         <DropdownMenu>
