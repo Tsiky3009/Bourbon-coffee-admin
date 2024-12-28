@@ -1,6 +1,5 @@
 import { ObjectId } from "mongodb";
 import { createEditoBucket } from "../../../lib/edito.service";
-import fs from "fs";
 
 export default async function handler(req, res) {
   const bucket = createEditoBucket();

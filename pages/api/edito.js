@@ -1,16 +1,7 @@
 import formidable from "formidable";
-import { promises as fsPromises } from "fs";
-import { ObjectId } from "mongodb";
-import client from "@/lib/mongodb";
-import { UPLOAD_DIR } from "@/lib/constants";
-import path from "path";
-import {
-  createEditoBucket,
-  retrieveFiles,
-  uploadFile,
-} from "../../lib/edito.service";
+import { retrieveFiles, uploadFile } from "../../lib/edito.service";
 
-// Désactive le bodyParser de Next.js pour gérer les fichiers
+// Use formidable parse instead
 export const config = {
   api: {
     bodyParser: false,
@@ -18,12 +9,10 @@ export const config = {
 };
 
 export default async function handler(req, res) {
-  let collection = client.db().collection("files");
-
   if (req.method === "POST") {
     let form = formidable({});
     try {
-      let [fields, files] = await form.parse(req);
+      let [_fields, files] = await form.parse(req);
 
       if (!files.file || !files.file[0]) {
         return res
@@ -47,7 +36,4 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: "Failed to fetch files" });
     }
   }
-
-  // res.setHeader("Allow", ["POST", "GET", "PUT", "DELETE"]);
-  // return res.status(405).end(`Method ${req.method} Not Allowed`);
 }
