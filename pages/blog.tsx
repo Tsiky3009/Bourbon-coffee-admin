@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import Link from "next/link";
 
 export default function BlogPage() {
   const { toast } = useToast();
@@ -104,8 +105,10 @@ export default function BlogPage() {
     <AdminLayout>
       <div className="w-full h-screen p-4">
         <div className="flex justify-between">
-          <h1 className="text-2xl font-semibold">Blogs</h1>
-          <Button>Ecrire une article</Button>
+          <h1 className="text-2xl font-semibold">Articles</h1>
+          <Link href={"/blog/create"}>
+            <Button>Ecrire une article</Button>
+          </Link>
         </div>
         {isError ? (
           <p className="text-red-500">

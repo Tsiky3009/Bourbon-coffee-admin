@@ -1,5 +1,4 @@
 import "@mdxeditor/editor/style.css";
-import React from "react";
 import {
   MDXEditor,
   headingsPlugin,
@@ -13,17 +12,19 @@ import {
   BlockTypeSelect,
   InsertImage,
 } from "@mdxeditor/editor";
+import style from "./editor.module.css";
 
 type Props = {
-  blogTitle: string;
+  blogContent: string;
   handleChange: (md: string) => void;
 };
 
-const Editor = ({ blogTitle, handleChange }: Props) => {
+const Editor = ({ blogContent, handleChange }: Props) => {
   return (
     <MDXEditor
+      contentEditableClassName="mdxeditor-content"
       onChange={(md) => handleChange(md)}
-      markdown={blogTitle}
+      markdown={blogContent}
       plugins={[
         headingsPlugin(),
         listsPlugin(),
